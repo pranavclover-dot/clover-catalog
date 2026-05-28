@@ -1,0 +1,6 @@
+.next/
+node_modules/
+.env.local
+*.pdf
+.DS_Store
+Thumbs.db

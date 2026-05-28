@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 794 1123" width="794" height="1123">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4e8d8"/>
+      <stop offset="60%" stop-color="#c2d9c6"/>
+      <stop offset="100%" stop-color="#a8c4ac"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c4956a"/>
+      <stop offset="100%" stop-color="#a07840"/>
+    </linearGradient>
+    <linearGradient id="window_light" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff9e8" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffe4a0" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="bed_shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e0d4"/>
+      <stop offset="100%" stop-color="#d4c8b8"/>
+    </linearGradient>
+    <filter id="soft_shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.25)"/>
+    </filter>
+    <filter id="lamp_glow">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND WALL -->
+  <rect width="794" height="760" fill="url(#wall)"/>
+
+  <!-- FLOOR -->
+  <rect y="710" width="794" height="413" fill="url(#floor)"/>
+  <!-- Floor highlight stripe -->
+  <rect y="708" width="794" height="6" fill="#d4a870" opacity="0.6"/>
+
+  <!-- Subtle wall texture lines -->
+  <line x1="0" y1="240" x2="794" y2="240" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  <line x1="0" y1="480" x2="794" y2="480" stroke="rgba(0,0,0,0.05)" stroke-width="1"/>
+
+  <!-- ═══ LEFT WINDOW with warm light ═══ -->
+  <!-- Curtain rod left -->
+  <rect x="-4" y="60" width="228" height="9" rx="4" fill="#7a5535"/>
+  <!-- Left curtain panel -->
+  <rect x="0" y="69" width="52" height="320" fill="#1a6b3a"/>
+  <rect x="0" y="69" width="10" height="320" fill="rgba(0,0,0,0.12)"/>
+  <!-- Right curtain panel -->
+  <rect x="155" y="69" width="64" height="320" fill="#1a6b3a"/>
+  <rect x="208" y="69" width="11" height="320" fill="rgba(0,0,0,0.12)"/>
+
+  <!-- Window frame -->
+  <rect x="54" y="75" width="100" height="240" rx="3" fill="#7a5535"/>
+  <!-- Window glass with warm sunlight -->
+  <rect x="58" y="79" width="92" height="232" rx="2" fill="url(#window_light)"/>
+  <!-- Window panes -->
+  <line x1="104" y1="79" x2="104" y2="311" stroke="#7a5535" stroke-width="3"/>
+  <line x1="58" y1="195" x2="150" y2="195" stroke="#7a5535" stroke-width="3"/>
+  <!-- Window light ray on floor -->
+  <path d="M54,311 L150,311 L190,760 L14,760 Z" fill="rgba(255,230,150,0.08)"/>
+
+  <!-- ═══ RIGHT WINDOW ═══ -->
+  <!-- Curtain rod right -->
+  <rect x="570" y="60" width="228" height="9" rx="4" fill="#7a5535"/>
+  <!-- Left curtain panel -->
+  <rect x="570" y="69" width="64" height="320" fill="#1a6b3a"/>
+  <rect x="570" y="69" width="11" height="320" fill="rgba(0,0,0,0.12)"/>
+  <!-- Right curtain panel -->
+  <rect x="742" y="69" width="52" height="320" fill="#1a6b3a"/>
+  <rect x="784" y="69" width="10" height="320" fill="rgba(0,0,0,0.12)"/>
+
+  <!-- Window frame -->
+  <rect x="636" y="75" width="100" height="240" rx="3" fill="#7a5535"/>
+  <!-- Window glass -->
+  <rect x="640" y="79" width="92" height="232" rx="2" fill="url(#window_light)"/>
+  <!-- Panes -->
+  <line x1="686" y1="79" x2="686" y2="311" stroke="#7a5535" stroke-width="3"/>
+  <line x1="640" y1="195" x2="732" y2="195" stroke="#7a5535" stroke-width="3"/>
+  <!-- Light ray -->
+  <path d="M636,311 L732,311 L780,760 L604,760 Z" fill="rgba(255,230,150,0.08)"/>
+
+  <!-- ═══ AREA RUG ═══ -->
+  <ellipse cx="397" cy="840" rx="285" ry="60" fill="#8b4513" opacity="0.22"/>
+  <ellipse cx="397" cy="840" rx="270" ry="54" fill="#0e6b3a" opacity="0.18"/>
+  <ellipse cx="397" cy="840" rx="250" ry="48" fill="none" stroke="#0e6b3a" stroke-width="2" opacity="0.15"/>
+
+  <!-- ═══ BED — central furniture piece ═══ -->
+  <!-- Bed shadow on floor -->
+  <ellipse cx="397" cy="1000" rx="310" ry="40" fill="rgba(0,0,0,0.18)"/>
+
+  <!-- Bed legs -->
+  <rect x="200" y="980" width="18" height="60" rx="4" fill="#5a3510"/>
+  <rect x="576" y="980" width="18" height="60" rx="4" fill="#5a3510"/>
+
+  <!-- Bed frame base -->
+  <rect x="182" y="680" width="430" height="320" rx="12" fill="#6b4020"/>
+  <!-- Frame top surface highlight -->
+  <rect x="182" y="680" width="430" height="16" rx="8" fill="#7a5030"/>
+
+  <!-- HEADBOARD -->
+  <rect x="182" y="500" width="430" height="195" rx="14" fill="#5a3010"/>
+  <!-- Headboard padding/panel -->
+  <rect x="200" y="516" width="394" height="162" rx="10" fill="#6e4020"/>
+  <!-- Headboard button tufting -->
+  <circle cx="280" cy="565" r="7" fill="#4a2810"/>
+  <circle cx="397" cy="565" r="7" fill="#4a2810"/>
+  <circle cx="514" cy="565" r="7" fill="#4a2810"/>
+  <circle cx="280" cy="630" r="7" fill="#4a2810"/>
+  <circle cx="397" cy="630" r="7" fill="#4a2810"/>
+  <circle cx="514" cy="630" r="7" fill="#4a2810"/>
+  <!-- Headboard highlight -->
+  <rect x="200" y="516" width="394" height="8" rx="5" fill="rgba(255,255,255,0.06)"/>
+
+  <!-- MATTRESS -->
+  <rect x="192" y="698" width="410" height="290" rx="8" fill="url(#bed_shade)"/>
+  <!-- Mattress piping line -->
+  <rect x="192" y="698" width="410" height="4" rx="4" fill="rgba(255,255,255,0.4)"/>
+
+  <!-- BED SHEET — Clover green -->
+  <rect x="192" y="740" width="410" height="248" rx="6" fill="#c8dece"/>
+  <!-- Sheet fold at top -->
+  <rect x="192" y="740" width="410" height="52" rx="6" fill="#e8f4ec"/>
+  <!-- Sheet fold accent stripe -->
+  <rect x="192" y="788" width="410" height="5" fill="#0e6b3a" opacity="0.5"/>
+  <!-- Sheet texture lines -->
+  <line x1="192" y1="820" x2="602" y2="820" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+  <line x1="192" y1="870" x2="602" y2="870" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+  <line x1="192" y1="920" x2="602" y2="920" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+  <!-- PILLOWS -->
+  <!-- Left pillow -->
+  <rect x="210" y="700" width="150" height="82" rx="14" fill="white"/>
+  <rect x="210" y="700" width="150" height="82" rx="14" fill="none" stroke="#d0ccc8" stroke-width="2"/>
+  <!-- Pillow shadow bottom -->
+  <rect x="210" y="774" width="150" height="8" rx="4" fill="rgba(0,0,0,0.06)"/>
+  <!-- Pillow embroidery -->
+  <line x1="265" y1="726" x2="305" y2="756" stroke="#0e6b3a" stroke-width="1.5" opacity="0.3"/>
+  <line x1="305" y1="726" x2="265" y2="756" stroke="#0e6b3a" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Right pillow -->
+  <rect x="434" y="700" width="150" height="82" rx="14" fill="white"/>
+  <rect x="434" y="700" width="150" height="82" rx="14" fill="none" stroke="#d0ccc8" stroke-width="2"/>
+  <rect x="434" y="774" width="150" height="8" rx="4" fill="rgba(0,0,0,0.06)"/>
+  <!-- Pillow embroidery -->
+  <line x1="489" y1="726" x2="529" y2="756" stroke="#0e6b3a" stroke-width="1.5" opacity="0.3"/>
+  <line x1="529" y1="726" x2="489" y2="756" stroke="#0e6b3a" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Throw blanket at foot -->
+  <path d="M260,958 Q397,944 534,958 Q520,990 397,998 Q274,990 260,958Z" fill="#0e6b3a" opacity="0.65"/>
+  <path d="M280,958 Q397,946 514,958 Q505,978 397,984 Q289,978 280,958Z" fill="#2a9a5a" opacity="0.35"/>
+
+  <!-- ═══ LEFT NIGHTSTAND ═══ -->
+  <rect x="64" y="750" width="108" height="230" rx="8" fill="#8a6035"/>
+  <rect x="64" y="750" width="108" height="16" rx="6" fill="#9a7045"/>
+  <!-- Drawer line -->
+  <line x1="64" y1="840" x2="172" y2="840" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+  <!-- Drawer handle -->
+  <rect x="106" y="888" width="28" height="5" rx="2" fill="#c8a060"/>
+  <!-- Nightstand legs -->
+  <rect x="72" y="960" width="12" height="20" rx="3" fill="#6a4820"/>
+  <rect x="152" y="960" width="12" height="20" rx="3" fill="#6a4820"/>
+
+  <!-- LAMP LEFT -->
+  <!-- Lamp base -->
+  <rect x="101" y="685" width="22" height="65" rx="4" fill="#c8a060"/>
+  <!-- Lamp shade -->
+  <path d="M86,650 L129,650 L139,685 L76,685 Z" fill="#f0d890"/>
+  <path d="M86,650 L129,650 L139,685 L76,685 Z" fill="none" stroke="#d4b860" stroke-width="1.5"/>
+  <!-- Lamp glow on table -->
+  <ellipse cx="112" cy="750" rx="40" ry="10" fill="rgba(255,220,100,0.18)"/>
+  <!-- Warm glow emanation -->
+  <ellipse cx="112" cy="720" rx="55" ry="45" fill="rgba(255,200,80,0.08)"/>
+
+  <!-- Small decorative item on left nightstand -->
+  <rect x="148" y="730" width="16" height="22" rx="2" fill="#e8e0d0"/>
+  <rect x="148" y="730" width="16" height="3" rx="1" fill="#0e6b3a"/>
+
+  <!-- ═══ RIGHT NIGHTSTAND ═══ -->
+  <rect x="622" y="750" width="108" height="230" rx="8" fill="#8a6035"/>
+  <rect x="622" y="750" width="108" height="16" rx="6" fill="#9a7045"/>
+  <line x1="622" y1="840" x2="730" y2="840" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+  <rect x="662" y="888" width="28" height="5" rx="2" fill="#c8a060"/>
+  <rect x="630" y="960" width="12" height="20" rx="3" fill="#6a4820"/>
+  <rect x="710" y="960" width="12" height="20" rx="3" fill="#6a4820"/>
+
+  <!-- PLANT on right nightstand -->
+  <!-- Pot -->
+  <path d="M654,730 L668,730 L672,760 L650,760 Z" fill="#c46a40"/>
+  <rect x="648" y="760" width="26" height="5" rx="2" fill="#b05a30"/>
+  <!-- Soil -->
+  <ellipse cx="661" cy="730" rx="10" ry="3" fill="#5a3010"/>
+  <!-- Plant stems and leaves -->
+  <line x1="661" y1="728" x2="661" y2="680" stroke="#1a6b2a" stroke-width="2"/>
+  <line x1="661" y1="710" x2="641" y2="685" stroke="#1a6b2a" stroke-width="2"/>
+  <line x1="661" y1="700" x2="678" y2="672" stroke="#1a6b2a" stroke-width="2"/>
+  <!-- Leaves -->
+  <ellipse cx="661" cy="675" rx="14" ry="9" fill="#0e6b3a" transform="rotate(-10,661,675)"/>
+  <ellipse cx="638" cy="682" rx="12" ry="8" fill="#1a8040" transform="rotate(30,638,682)"/>
+  <ellipse cx="680" cy="668" rx="11" ry="7" fill="#0e6b3a" transform="rotate(-25,680,668)"/>
+  <ellipse cx="655" cy="660" rx="10" ry="6" fill="#2a9040" transform="rotate(5,655,660)"/>
+
+  <!-- Small glass of water -->
+  <rect x="697" y="736" width="18" height="22" rx="3" fill="rgba(180,220,255,0.5)" stroke="rgba(150,200,240,0.6)" stroke-width="1"/>
+
+  <!-- ═══ FLOOR LAMP (far right) ═══ -->
+  <!-- Pole -->
+  <rect x="748" y="400" width="6" height="360" rx="3" fill="#7a6040"/>
+  <!-- Base -->
+  <ellipse cx="751" cy="760" rx="26" ry="8" fill="#6a5030"/>
+  <!-- Shade -->
+  <path d="M726,380 L776,380 L790,420 L712,420 Z" fill="#f4e8c0"/>
+  <path d="M726,380 L776,380 L790,420 L712,420 Z" fill="none" stroke="#d4c090" stroke-width="2"/>
+  <!-- Glow -->
+  <ellipse cx="751" cy="420" rx="60" ry="40" fill="rgba(255,200,80,0.07)"/>
+
+  <!-- ═══ ARTWORK on wall ═══ -->
+  <!-- Frame -->
+  <rect x="310" y="140" width="174" height="220" rx="4" fill="#4a3018"/>
+  <rect x="318" y="148" width="158" height="204" rx="3" fill="#f0ece0"/>
+  <!-- Abstract botanical artwork inside -->
+  <ellipse cx="397" cy="222" rx="45" ry="60" fill="#c8e0c4"/>
+  <ellipse cx="375" cy="200" rx="20" ry="32" fill="#0e6b3a" opacity="0.6" transform="rotate(-20,375,200)"/>
+  <ellipse cx="418" cy="198" rx="18" ry="28" fill="#1a8040" opacity="0.55" transform="rotate(15,418,198)"/>
+  <ellipse cx="397" cy="190" rx="14" ry="22" fill="#0e6b3a" opacity="0.7"/>
+  <line x1="397" y1="250" x2="397" y2="340" stroke="#5a3010" stroke-width="3"/>
+  <!-- Frame inner bevel -->
+  <rect x="318" y="148" width="158" height="204" rx="3" fill="none" stroke="rgba(0,0,0,0.08)" stroke-width="4"/>
+
+  <!-- ═══ SUBTLE MOOD AMBIANCE ═══ -->
+  <!-- Warm light pool from left window on floor -->
+  <ellipse cx="104" cy="830" rx="90" ry="36" fill="rgba(255,210,100,0.09)"/>
+  <!-- Warm light pool from right window -->
+  <ellipse cx="690" cy="830" rx="90" ry="36" fill="rgba(255,210,100,0.09)"/>
+</svg>
