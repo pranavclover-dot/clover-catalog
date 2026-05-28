@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { CATEGORIES, CATEGORY_NAMES } from "@/lib/categories";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PHOTO } from "@/lib/categories";
 import { BRAND } from "@/lib/brand";
+import Cover from "@/app/_pdf/Cover";
+import PhotoPage from "@/app/_pdf/PhotoPage";
+import ContactPage from "@/app/_pdf/ContactPage";
 
 interface PhotoPreview {
   id: string;
@@ -10,7 +13,7 @@ interface PhotoPreview {
   file: File;
 }
 
-type Step = "form" | "generating" | "done";
+type Step = "form" | "printing" | "done";
 
 export default function HomePage() {
   const [category, setCategory] = useState("");
@@ -18,7 +21,6 @@ export default function HomePage() {
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [step, setStep] = useState<Step>("form");
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -74,6 +76,23 @@ export default function HomePage() {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
   };
 
+  // ── Auto-trigger print when step becomes "printing" ──
+  useEffect(() => {
+    if (step !== "printing") return;
+
+    // Listen for afterprint so we transition to "done" when dialog closes
+    const handleAfterPrint = () => setStep("done");
+    window.addEventListener("afterprint", handleAfterPrint);
+
+    // Give images 1.5 s to fully render, then open print dialog
+    const t = setTimeout(() => window.print(), 1500);
+
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener("afterprint", handleAfterPrint);
+    };
+  }, [step]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -82,60 +101,18 @@ export default function HomePage() {
     if (!productCode.trim()) { setError("Please enter a product code."); return; }
     if (photos.length === 0) { setError("Please add at least one photo."); return; }
 
-    setStep("generating");
-
-    try {
-      // Save job to sessionStorage, open /pdf-print in a new tab.
-      // The browser's native Print → Save as PDF generates the PDF —
-      // no Puppeteer / Chromium needed on the server.
-      const job = {
-        category,
-        productCode: productCode.trim(),
-        description: description.trim(),
-        photoDataUris: photos.map((p) => p.dataUrl),
-      };
-      sessionStorage.setItem("pdf-job", JSON.stringify(job));
-      window.open("/pdf-print", "_blank");
-      setStep("done");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-      setStep("form");
-    }
+    setStep("printing");
   };
 
   const handleShare = async () => {
-    if (!pdfUrl) return;
-    const fileName = `${productCode.replace(/\s+/g, "_")}_Clover.pdf`;
-
-    if (navigator.share) {
-      try {
-        const blob = await fetch(pdfUrl).then((r) => r.blob());
-        const file = new File([blob], fileName, { type: "application/pdf" });
-        await navigator.share({ files: [file], title: `${BRAND.companyName} – ${productCode}` });
-        return;
-      } catch {
-        // fall through to WhatsApp link
-      }
-    }
-
-    // Fallback: open WhatsApp with a text message (PDF must be shared manually)
     const text = encodeURIComponent(
       `${BRAND.companyName} – ${category}\nProduct: ${productCode}\n${BRAND.phone}`
     );
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
-  const handleDownload = () => {
-    if (!pdfUrl) return;
-    const a = document.createElement("a");
-    a.href = pdfUrl;
-    a.download = `${productCode.replace(/\s+/g, "_")}_Clover.pdf`;
-    a.click();
-  };
-
   const handleReset = () => {
     setStep("form");
-    setPdfUrl(null);
     setError(null);
     setPhotos([]);
     setProductCode("");
@@ -143,208 +120,262 @@ export default function HomePage() {
     setCategory("");
   };
 
+  // ── Build print pages ──
+  const photoDataUris = photos.map((p) => p.dataUrl);
+  const pairs: [string, string | undefined][] = [];
+  for (let i = 0; i < photoDataUris.length; i += 2) {
+    pairs.push([photoDataUris[i], photoDataUris[i + 1]]);
+  }
+  const coverPhoto = CATEGORY_PHOTO[category] ?? "/lifestyle.svg";
+
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: "var(--clover-cream)" }}>
-      {/* Header */}
-      <header
-        className="flex items-center justify-between px-4 py-3 text-white"
-        style={{ backgroundColor: "var(--clover-green)" }}
-      >
-        <div className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover-logo.png" alt="Clover" className="w-8 h-8 object-contain" />
-          <div>
-            <div className="font-black text-sm tracking-widest">{BRAND.wordmark}®</div>
-            <div className="text-[9px] tracking-[0.2em] opacity-80">{BRAND.tagline}</div>
+    <>
+      {/* ══ PRINT CSS — hides app UI, shows catalog pages ══ */}
+      <style>{`
+        @media print {
+          html, body { width: 794px; margin: 0; padding: 0; background: white; }
+          .no-print { display: none !important; }
+          .print-catalog { display: block !important; }
+          .print-page {
+            width: 794px;
+            height: 1123px;
+            overflow: hidden;
+            page-break-after: always;
+            break-after: page;
+          }
+          @page { size: A4 portrait; margin: 0; }
+        }
+        @media screen {
+          .print-catalog { display: none !important; }
+        }
+      `}</style>
+
+      {/* ══ PRINT PAGES (screen-hidden, print-visible) ══ */}
+      {(step === "printing" || step === "done") && (
+        <div className="print-catalog">
+          <div className="print-page">
+            <Cover
+              category={category}
+              productCode={productCode}
+              description={description}
+              lifestylePhotoSrc={coverPhoto}
+            />
+          </div>
+
+          {pairs.map(([top, bottom], idx) => (
+            <div className="print-page" key={idx}>
+              <PhotoPage topPhoto={top} bottomPhoto={bottom} pageNumber={idx + 2} />
+            </div>
+          ))}
+
+          <div className="print-page">
+            <ContactPage lifestylePhotoSrc={coverPhoto} />
           </div>
         </div>
-        <div className="text-xs opacity-75">Catalog Generator</div>
-      </header>
+      )}
 
-      {/* Body */}
-      <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
-
-        {/* ── DONE STATE ──────────────────────────────────────── */}
-        {step === "done" && (
-          <div className="flex flex-col items-center gap-5 pt-8 text-center">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl"
-              style={{ backgroundColor: "var(--clover-green)" }}
-            >
-              ✓
-            </div>
+      {/* ══ APP UI ══ */}
+      <div className="no-print min-h-dvh flex flex-col" style={{ background: "var(--clover-cream)" }}>
+        {/* Header */}
+        <header
+          className="flex items-center justify-between px-4 py-3 text-white"
+          style={{ backgroundColor: "var(--clover-green)" }}
+        >
+          <div className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/clover-logo.png" alt="Clover" className="w-8 h-8 object-contain" />
             <div>
-              <h2 className="text-xl font-bold text-gray-900">PDF Ready!</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {productCode} · {category}
+              <div className="font-black text-sm tracking-widest">{BRAND.wordmark}®</div>
+              <div className="text-[9px] tracking-[0.2em] opacity-80">{BRAND.tagline}</div>
+            </div>
+          </div>
+          <div className="text-xs opacity-75">Catalog Generator</div>
+        </header>
+
+        {/* Body */}
+        <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
+
+          {/* ── DONE STATE ──────────────────────────────────────── */}
+          {step === "done" && (
+            <div className="flex flex-col items-center gap-5 pt-8 text-center">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl"
+                style={{ backgroundColor: "var(--clover-green)" }}
+              >
+                ✓
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Catalog Printed!</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {productCode} · {category}
+                </p>
+              </div>
+
+              <button
+                onClick={() => window.print()}
+                className="w-full py-3.5 rounded-xl font-semibold text-white text-sm"
+                style={{ backgroundColor: "var(--clover-green)" }}
+              >
+                Print / Save as PDF again
+              </button>
+
+              <button
+                onClick={handleShare}
+                className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
+                style={{ backgroundColor: "#25D366", color: "white" }}
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                Share on WhatsApp
+              </button>
+
+              <button
+                onClick={handleReset}
+                className="text-sm underline text-gray-500 mt-2"
+              >
+                Generate another
+              </button>
+            </div>
+          )}
+
+          {/* ── PRINTING STATE ────────────────────────────────── */}
+          {step === "printing" && (
+            <div className="flex flex-col items-center gap-4 pt-16 text-center">
+              <div
+                className="w-14 h-14 rounded-full border-4 border-t-transparent animate-spin"
+                style={{ borderColor: "var(--clover-green)", borderTopColor: "transparent" }}
+              />
+              <p className="font-semibold text-gray-700">Opening print dialog…</p>
+              <p className="text-xs text-gray-400">
+                In the print dialog, change the destination to <strong>"Save as PDF"</strong> then click Save.
               </p>
             </div>
+          )}
 
-            <button
-              onClick={handleDownload}
-              className="w-full py-3.5 rounded-xl font-semibold text-white text-sm"
-              style={{ backgroundColor: "var(--clover-green)" }}
-            >
-              Download PDF
-            </button>
+          {/* ── FORM STATE ──────────────────────────────────────── */}
+          {step === "form" && (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <h1 className="text-lg font-bold text-gray-900">New Product Catalog</h1>
 
-            <button
-              onClick={handleShare}
-              className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
-              style={{
-                backgroundColor: "#25D366",
-                color: "white",
-              }}
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
-              Share on WhatsApp
-            </button>
-
-            <button
-              onClick={handleReset}
-              className="text-sm underline text-gray-500 mt-2"
-            >
-              Generate another
-            </button>
-          </div>
-        )}
-
-        {/* ── GENERATING STATE ────────────────────────────────── */}
-        {step === "generating" && (
-          <div className="flex flex-col items-center gap-4 pt-16 text-center">
-            <div
-              className="w-14 h-14 rounded-full border-4 border-t-transparent animate-spin"
-              style={{ borderColor: "var(--clover-green)", borderTopColor: "transparent" }}
-            />
-            <p className="font-semibold text-gray-700">Generating PDF…</p>
-            <p className="text-xs text-gray-400">This takes a few seconds</p>
-          </div>
-        )}
-
-        {/* ── FORM STATE ──────────────────────────────────────── */}
-        {step === "form" && (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <h1 className="text-lg font-bold text-gray-900">New Product Catalog</h1>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-                {error}
-              </div>
-            )}
-
-            {/* Category */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm appearance-none focus:outline-none focus:ring-2"
-                style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
-              >
-                <option value="">Select a category…</option>
-                {CATEGORY_NAMES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Product code */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Product Code
-              </label>
-              <input
-                type="text"
-                value={productCode}
-                onChange={(e) => setProductCode(e.target.value)}
-                placeholder="e.g. BS 1 EECO"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2"
-                style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
-              />
-            </div>
-
-            {/* Description */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Description
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Product description…"
-                rows={5}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm resize-none focus:outline-none focus:ring-2"
-                style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
-              />
-            </div>
-
-            {/* Photo upload */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Product Photos ({photos.length})
-              </label>
-
-              {/* Preview grid */}
-              {photos.length > 0 && (
-                <div className="photo-grid">
-                  {photos.map((p) => (
-                    <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={p.dataUrl} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removePhoto(p.id)}
-                        className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center leading-none"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+                  {error}
                 </div>
               )}
 
-              {/* Add photos button */}
+              {/* Category */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Category
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm appearance-none focus:outline-none focus:ring-2"
+                  style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
+                >
+                  <option value="">Select a category…</option>
+                  {CATEGORY_NAMES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Product code */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Product Code
+                </label>
+                <input
+                  type="text"
+                  value={productCode}
+                  onChange={(e) => setProductCode(e.target.value)}
+                  placeholder="e.g. BS 1 EECO"
+                  required
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2"
+                  style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
+                />
+              </div>
+
+              {/* Description */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Product description…"
+                  rows={5}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm resize-none focus:outline-none focus:ring-2"
+                  style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
+                />
+              </div>
+
+              {/* Photo upload */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Product Photos ({photos.length})
+                </label>
+
+                {/* Preview grid */}
+                {photos.length > 0 && (
+                  <div className="photo-grid">
+                    {photos.map((p) => (
+                      <div key={p.id} className="relative aspect-square rounded-lg overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={p.dataUrl} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(p.id)}
+                          className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center leading-none"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add photos button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-sm text-gray-500 flex flex-col items-center gap-1 active:bg-gray-50"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Tap to add photos</span>
+                  <span className="text-xs text-gray-400">Camera or gallery</span>
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  capture="environment"
+                  onChange={(e) => handleFiles(e.target.files)}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Submit */}
               <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-sm text-gray-500 flex flex-col items-center gap-1 active:bg-gray-50"
+                type="submit"
+                className="w-full py-4 rounded-xl font-bold text-white text-sm mt-2 active:opacity-90 disabled:opacity-50"
+                style={{ backgroundColor: "var(--clover-green)" }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>Tap to add photos</span>
-                <span className="text-xs text-gray-400">Camera or gallery</span>
+                Generate PDF
               </button>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                capture="environment"
-                onChange={(e) => handleFiles(e.target.files)}
-                className="hidden"
-              />
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              className="w-full py-4 rounded-xl font-bold text-white text-sm mt-2 active:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: "var(--clover-green)" }}
-            >
-              Generate PDF
-            </button>
-          </form>
-        )}
-      </main>
-    </div>
+            </form>
+          )}
+        </main>
+      </div>
+    </>
   );
 }
