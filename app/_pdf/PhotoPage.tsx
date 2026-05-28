@@ -47,6 +47,8 @@ function EmptyCard() {
         flex: 1,
         borderRadius: "14px",
         backgroundColor: "#e8f0ea",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
         flexShrink: 0,
         boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
       }}
@@ -72,6 +74,8 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         style={{
           height: "64px",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           display: "flex",
           alignItems: "center",
           padding: "0 44px",
@@ -103,7 +107,7 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
       </div>
 
       {/* Bright green accent rule — same as cover */}
-      <div style={{ height: "3px", backgroundColor: "#2ecc71", flexShrink: 0 }} />
+      <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
 
       {/* ══ PHOTOS AREA — fills all remaining height ══ */}
       <div
@@ -148,6 +152,8 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         style={{
           height: "36px",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           flexShrink: 0,
           display: "flex",
           alignItems: "center",
@@ -158,11 +164,11 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600 }}>
           {BRAND.companyName}
         </div>
-        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71" }} />
+        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
         <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", fontWeight: 500 }}>
           {BRAND.website}
         </div>
-        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71" }} />
+        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
         <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", fontWeight: 500 }}>
           {BRAND.phone}
         </div>

@@ -43,6 +43,8 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
           height: "44px",
           borderRadius: "50%",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -103,6 +105,8 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
         style={{
           height: "64px",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           display: "flex",
           alignItems: "center",
           padding: "0 44px",
@@ -128,7 +132,7 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
       </div>
 
       {/* Bright green accent rule — same as PhotoPage & cover */}
-      <div style={{ height: "3px", backgroundColor: "#2ecc71", flexShrink: 0 }} />
+      <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
 
       {/* ══ SECTION HEADING ══ */}
       <div style={{ padding: "28px 44px 0", flexShrink: 0 }}>
@@ -209,6 +213,8 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
         style={{
           height: "36px",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           flexShrink: 0,
           display: "flex",
           alignItems: "center",

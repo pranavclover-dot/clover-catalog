@@ -134,6 +134,12 @@ export default function HomePage() {
       <style>{`
         @media print {
           html, body { width: 794px; margin: 0; padding: 0; background: white; }
+          /* Force ALL background colors and images to print */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           .no-print { display: none !important; }
           .print-catalog { display: block !important; }
           .print-page {

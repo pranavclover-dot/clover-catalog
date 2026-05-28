@@ -71,6 +71,8 @@ export default function Cover({
           right: 0,
           height: "600px",
           background: "linear-gradient(to top, rgba(4,22,11,0.97) 0%, rgba(6,28,14,0.93) 30%, rgba(7,31,16,0.72) 60%, rgba(7,31,16,0) 100%)",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
         }}
       />
 
@@ -86,6 +88,8 @@ export default function Cover({
           right: 0,
           height: "68px",
           backgroundColor: "#0e6b3a",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
