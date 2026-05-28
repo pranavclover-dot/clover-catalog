@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PHOTO } from "@/lib/categories";
 import { BRAND } from "@/lib/brand";
 import Cover from "@/app/_pdf/Cover";
@@ -13,7 +13,7 @@ interface PhotoPreview {
   file: File;
 }
 
-type Step = "form" | "ready" | "done";
+type Step = "form" | "generating" | "done";
 
 export default function HomePage() {
   const [category, setCategory] = useState("");
@@ -22,7 +22,9 @@ export default function HomePage() {
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pagesRef = useRef<HTMLDivElement>(null);
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
@@ -76,19 +78,6 @@ export default function HomePage() {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
   };
 
-  // ── Listen for afterprint to transition to done ──
-  useEffect(() => {
-    if (step !== "ready") return;
-    const handleAfterPrint = () => setStep("done");
-    window.addEventListener("afterprint", handleAfterPrint);
-    return () => window.removeEventListener("afterprint", handleAfterPrint);
-  }, [step]);
-
-  // ── Called directly from user tap — satisfies browser gesture requirement ──
-  const handlePrint = () => {
-    window.print();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -97,10 +86,73 @@ export default function HomePage() {
     if (!productCode.trim()) { setError("Please enter a product code."); return; }
     if (photos.length === 0) { setError("Please add at least one photo."); return; }
 
-    setStep("ready");
+    setStep("generating");
+
+    // Small delay so React renders the hidden pages into the DOM first
+    await new Promise((r) => setTimeout(r, 300));
+
+    try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const container = pagesRef.current;
+      if (!container) throw new Error("Pages not mounted");
+
+      const pageEls = container.querySelectorAll<HTMLElement>(".pdf-page");
+      if (pageEls.length === 0) throw new Error("No pages found");
+
+      const pdf = new jsPDF({ orientation: "portrait", unit: "px", format: [794, 1123] });
+
+      for (let i = 0; i < pageEls.length; i++) {
+        const el = pageEls[i];
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: "#ffffff",
+          width: 794,
+          height: 1123,
+          logging: false,
+        });
+
+        if (i > 0) pdf.addPage([794, 1123], "portrait");
+        const imgData = canvas.toDataURL("image/jpeg", 0.92);
+        pdf.addImage(imgData, "JPEG", 0, 0, 794, 1123);
+      }
+
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setStep("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "PDF generation failed. Please try again.");
+      setStep("form");
+    }
+  };
+
+  const handleDownload = () => {
+    if (!pdfUrl) return;
+    const a = document.createElement("a");
+    a.href = pdfUrl;
+    a.download = `${productCode.trim().replace(/\s+/g, "_")}_Clover.pdf`;
+    a.click();
   };
 
   const handleShare = async () => {
+    if (pdfUrl) {
+      try {
+        const blob = await fetch(pdfUrl).then((r) => r.blob());
+        const file = new File([blob], `${productCode.trim().replace(/\s+/g, "_")}_Clover.pdf`, { type: "application/pdf" });
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: `${BRAND.companyName} – ${productCode}` });
+          return;
+        }
+      } catch {
+        // fall through to WhatsApp
+      }
+    }
     const text = encodeURIComponent(
       `${BRAND.companyName} – ${category}\nProduct: ${productCode}\n${BRAND.phone}`
     );
@@ -108,6 +160,8 @@ export default function HomePage() {
   };
 
   const handleReset = () => {
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    setPdfUrl(null);
     setStep("form");
     setError(null);
     setPhotos([]);
@@ -116,7 +170,7 @@ export default function HomePage() {
     setCategory("");
   };
 
-  // ── Build print pages ──
+  // Build page data
   const photoDataUris = photos.map((p) => p.dataUrl);
   const pairs: [string, string | undefined][] = [];
   for (let i = 0; i < photoDataUris.length; i += 2) {
@@ -126,36 +180,20 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ══ PRINT CSS — hides app UI, shows catalog pages ══ */}
-      <style>{`
-        @media print {
-          html, body { width: 794px; margin: 0; padding: 0; background: white; }
-          /* Force ALL background colors and images to print */
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-          .no-print { display: none !important; }
-          .print-catalog { display: block !important; }
-          .print-page {
-            width: 794px;
-            height: 1123px;
-            overflow: hidden;
-            page-break-after: always;
-            break-after: page;
-          }
-          @page { size: A4 portrait; margin: 0; }
-        }
-        @media screen {
-          .print-catalog { display: none !important; }
-        }
-      `}</style>
-
-      {/* ══ PRINT PAGES (screen-hidden, print-visible) ══ */}
-      {(step === "ready" || step === "done") && (
-        <div className="print-catalog">
-          <div className="print-page">
+      {/* ══ OFF-SCREEN RENDER AREA — captured by html2canvas ══ */}
+      {step !== "form" && (
+        <div
+          ref={pagesRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: "-10000px",
+            width: "794px",
+            pointerEvents: "none",
+            zIndex: -1,
+          }}
+        >
+          <div className="pdf-page" style={{ width: 794, height: 1123, overflow: "hidden" }}>
             <Cover
               category={category}
               productCode={productCode}
@@ -165,19 +203,19 @@ export default function HomePage() {
           </div>
 
           {pairs.map(([top, bottom], idx) => (
-            <div className="print-page" key={idx}>
+            <div key={idx} className="pdf-page" style={{ width: 794, height: 1123, overflow: "hidden" }}>
               <PhotoPage topPhoto={top} bottomPhoto={bottom} pageNumber={idx + 2} />
             </div>
           ))}
 
-          <div className="print-page">
+          <div className="pdf-page" style={{ width: 794, height: 1123, overflow: "hidden" }}>
             <ContactPage lifestylePhotoSrc={coverPhoto} />
           </div>
         </div>
       )}
 
       {/* ══ APP UI ══ */}
-      <div className="no-print min-h-dvh flex flex-col" style={{ background: "var(--clover-cream)" }}>
+      <div className="min-h-dvh flex flex-col" style={{ background: "var(--clover-cream)" }}>
         {/* Header */}
         <header
           className="flex items-center justify-between px-4 py-3 text-white"
@@ -185,11 +223,7 @@ export default function HomePage() {
         >
           <div className="flex items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/clover-logo.png" alt="Clover" className="w-8 h-8 object-contain" />
-            <div>
-              <div className="font-black text-sm tracking-widest">{BRAND.wordmark}®</div>
-              <div className="text-[9px] tracking-[0.2em] opacity-80">{BRAND.tagline}</div>
-            </div>
+            <img src="/clover-logo.png" alt="Clover" className="h-8 w-auto object-contain" />
           </div>
           <div className="text-xs opacity-75">Catalog Generator</div>
         </header>
@@ -207,18 +241,18 @@ export default function HomePage() {
                 ✓
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Catalog Printed!</h2>
+                <h2 className="text-xl font-bold text-gray-900">PDF Ready!</h2>
                 <p className="text-sm text-gray-500 mt-1">
                   {productCode} · {category}
                 </p>
               </div>
 
               <button
-                onClick={() => window.print()}
+                onClick={handleDownload}
                 className="w-full py-3.5 rounded-xl font-semibold text-white text-sm"
                 style={{ backgroundColor: "var(--clover-green)" }}
               >
-                Print / Save as PDF again
+                Download PDF
               </button>
 
               <button
@@ -241,36 +275,15 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* ── READY STATE ───────────────────────────────────── */}
-          {step === "ready" && (
-            <div className="flex flex-col items-center gap-5 pt-8 text-center">
+          {/* ── GENERATING STATE ────────────────────────────────── */}
+          {step === "generating" && (
+            <div className="flex flex-col items-center gap-4 pt-16 text-center">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl"
-                style={{ backgroundColor: "var(--clover-green)" }}
-              >
-                📄
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Catalog Ready!</h2>
-                <p className="text-sm text-gray-500 mt-1">
-                  Tap the button below to open the print dialog, then choose <strong>"Save as PDF"</strong>.
-                </p>
-              </div>
-
-              <button
-                onClick={handlePrint}
-                className="w-full py-4 rounded-xl font-bold text-white text-base active:opacity-90"
-                style={{ backgroundColor: "var(--clover-green)" }}
-              >
-                💾 Save as PDF
-              </button>
-
-              <button
-                onClick={handleReset}
-                className="text-sm underline text-gray-500"
-              >
-                Start over
-              </button>
+                className="w-14 h-14 rounded-full border-4 border-t-transparent animate-spin"
+                style={{ borderColor: "var(--clover-green)", borderTopColor: "transparent" }}
+              />
+              <p className="font-semibold text-gray-700">Building your PDF…</p>
+              <p className="text-xs text-gray-400">This takes a few seconds</p>
             </div>
           )}
 
@@ -341,7 +354,6 @@ export default function HomePage() {
                   Product Photos ({photos.length})
                 </label>
 
-                {/* Preview grid */}
                 {photos.length > 0 && (
                   <div className="photo-grid">
                     {photos.map((p) => (
@@ -360,7 +372,6 @@ export default function HomePage() {
                   </div>
                 )}
 
-                {/* Add photos button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -388,7 +399,7 @@ export default function HomePage() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full py-4 rounded-xl font-bold text-white text-sm mt-2 active:opacity-90 disabled:opacity-50"
+                className="w-full py-4 rounded-xl font-bold text-white text-sm mt-2 active:opacity-90"
                 style={{ backgroundColor: "var(--clover-green)" }}
               >
                 Generate PDF
