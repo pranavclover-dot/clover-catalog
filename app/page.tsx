@@ -13,7 +13,7 @@ interface PhotoPreview {
   file: File;
 }
 
-type Step = "form" | "printing" | "done";
+type Step = "form" | "ready" | "done";
 
 export default function HomePage() {
   const [category, setCategory] = useState("");
@@ -76,22 +76,18 @@ export default function HomePage() {
     setPhotos((prev) => prev.filter((p) => p.id !== id));
   };
 
-  // ── Auto-trigger print when step becomes "printing" ──
+  // ── Listen for afterprint to transition to done ──
   useEffect(() => {
-    if (step !== "printing") return;
-
-    // Listen for afterprint so we transition to "done" when dialog closes
+    if (step !== "ready") return;
     const handleAfterPrint = () => setStep("done");
     window.addEventListener("afterprint", handleAfterPrint);
-
-    // Give images 1.5 s to fully render, then open print dialog
-    const t = setTimeout(() => window.print(), 1500);
-
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("afterprint", handleAfterPrint);
-    };
+    return () => window.removeEventListener("afterprint", handleAfterPrint);
   }, [step]);
+
+  // ── Called directly from user tap — satisfies browser gesture requirement ──
+  const handlePrint = () => {
+    window.print();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,7 +97,7 @@ export default function HomePage() {
     if (!productCode.trim()) { setError("Please enter a product code."); return; }
     if (photos.length === 0) { setError("Please add at least one photo."); return; }
 
-    setStep("printing");
+    setStep("ready");
   };
 
   const handleShare = async () => {
@@ -157,7 +153,7 @@ export default function HomePage() {
       `}</style>
 
       {/* ══ PRINT PAGES (screen-hidden, print-visible) ══ */}
-      {(step === "printing" || step === "done") && (
+      {(step === "ready" || step === "done") && (
         <div className="print-catalog">
           <div className="print-page">
             <Cover
@@ -245,17 +241,36 @@ export default function HomePage() {
             </div>
           )}
 
-          {/* ── PRINTING STATE ────────────────────────────────── */}
-          {step === "printing" && (
-            <div className="flex flex-col items-center gap-4 pt-16 text-center">
+          {/* ── READY STATE ───────────────────────────────────── */}
+          {step === "ready" && (
+            <div className="flex flex-col items-center gap-5 pt-8 text-center">
               <div
-                className="w-14 h-14 rounded-full border-4 border-t-transparent animate-spin"
-                style={{ borderColor: "var(--clover-green)", borderTopColor: "transparent" }}
-              />
-              <p className="font-semibold text-gray-700">Opening print dialog…</p>
-              <p className="text-xs text-gray-400">
-                In the print dialog, change the destination to <strong>"Save as PDF"</strong> then click Save.
-              </p>
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white text-3xl"
+                style={{ backgroundColor: "var(--clover-green)" }}
+              >
+                📄
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Catalog Ready!</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Tap the button below to open the print dialog, then choose <strong>"Save as PDF"</strong>.
+                </p>
+              </div>
+
+              <button
+                onClick={handlePrint}
+                className="w-full py-4 rounded-xl font-bold text-white text-base active:opacity-90"
+                style={{ backgroundColor: "var(--clover-green)" }}
+              >
+                💾 Save as PDF
+              </button>
+
+              <button
+                onClick={handleReset}
+                className="text-sm underline text-gray-500"
+              >
+                Start over
+              </button>
             </div>
           )}
 
