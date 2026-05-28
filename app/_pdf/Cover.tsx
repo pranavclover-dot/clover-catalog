@@ -148,28 +148,28 @@ export default function Cover({
         }}
       >
         {/* ── ADDRESS — above the product code ── */}
-        <a href="https://share.google/P1bvtwyxU3HO2GR2I" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "18px", textDecoration: "none" }}>
+        <a href="https://share.google/P1bvtwyxU3HO2GR2I" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round" style={{ width: "15px", height: "15px", flexShrink: 0 }}>
+            strokeLinecap="round" strokeLinejoin="round" style={{ width: "13px", height: "13px", flexShrink: 0 }}>
             <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
           </svg>
-          <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.82)", letterSpacing: "0.03em", fontWeight: 600, whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", letterSpacing: "0.03em", fontWeight: 600, whiteSpace: "nowrap" }}>
             {BRAND.companyName} &nbsp;·&nbsp; {BRAND.address.line1} {BRAND.address.line2}, {BRAND.address.line3}
           </div>
         </a>
 
         {/* Thin green accent line */}
-        <div style={{ width: "56px", height: "3px", backgroundColor: "#2ecc71", marginBottom: "16px" }} />
+        <div style={{ width: "56px", height: "3px", backgroundColor: "#2ecc71", marginBottom: "10px" }} />
 
         {/* ── HERO PRODUCT CODE ── */}
         <div
           style={{
-            fontSize: "108px",
+            fontSize: "76px",
             fontWeight: 900,
             color: "#ffffff",
-            letterSpacing: "-0.04em",
-            lineHeight: 0.85,
-            marginBottom: "22px",
+            letterSpacing: "-0.03em",
+            lineHeight: 1,
+            marginBottom: "10px",
             textShadow: "0 2px 24px rgba(0,0,0,0.4)",
           }}
         >
@@ -179,11 +179,11 @@ export default function Cover({
         {/* Description */}
         <div
           style={{
-            fontSize: "13px",
+            fontSize: "12px",
             color: "rgba(255,255,255,0.75)",
-            lineHeight: "1.7",
+            lineHeight: "1.55",
             maxWidth: "560px",
-            marginBottom: "28px",
+            marginBottom: "14px",
             letterSpacing: "0.01em",
           }}
         >
@@ -194,8 +194,8 @@ export default function Cover({
         <div
           style={{
             borderTop: "1px solid rgba(255,255,255,0.18)",
-            paddingTop: "16px",
-            paddingBottom: "28px",
+            paddingTop: "12px",
+            paddingBottom: "20px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "0" }}>

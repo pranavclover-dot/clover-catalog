@@ -412,7 +412,6 @@ export default function HomePage() {
                   type="file"
                   accept="image/*"
                   multiple
-                  capture="environment"
                   onChange={(e) => handleFiles(e.target.files)}
                   className="hidden"
                 />
