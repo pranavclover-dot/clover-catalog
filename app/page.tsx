@@ -85,22 +85,17 @@ export default function HomePage() {
     setStep("generating");
 
     try {
-      const formData = new FormData();
-      formData.append("category", category);
-      formData.append("productCode", productCode.trim());
-      formData.append("description", description.trim());
-      photos.forEach((p, i) => formData.append(`photo_${i}`, p.dataUrl));
-
-      const res = await fetch("/api/generate-pdf", { method: "POST", body: formData });
-
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || "PDF generation failed");
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      setPdfUrl(url);
+      // Save job to sessionStorage, open /pdf-print in a new tab.
+      // The browser's native Print → Save as PDF generates the PDF —
+      // no Puppeteer / Chromium needed on the server.
+      const job = {
+        category,
+        productCode: productCode.trim(),
+        description: description.trim(),
+        photoDataUris: photos.map((p) => p.dataUrl),
+      };
+      sessionStorage.setItem("pdf-job", JSON.stringify(job));
+      window.open("/pdf-print", "_blank");
       setStep("done");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
