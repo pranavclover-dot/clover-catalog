@@ -2,14 +2,7 @@ import "server-only";
 import { createElement } from "react";
 import PdfDocument, { PdfDocumentProps } from "@/app/_pdf/PdfDocument";
 
-/**
- * Render PdfDocument to an HTML string that Puppeteer can print.
- * We inline Inter from Google Fonts + a small CSS reset so the
- * self-contained HTML renders correctly even with no network.
- */
 async function buildHtml(props: PdfDocumentProps): Promise<string> {
-  // Dynamic import prevents Next.js from including react-dom/server in the
-  // client bundle analysis
   const { renderToStaticMarkup } = await import("react-dom/server");
   const body = renderToStaticMarkup(createElement(PdfDocument, props));
 
@@ -35,13 +28,52 @@ async function buildHtml(props: PdfDocumentProps): Promise<string> {
 </html>`;
 }
 
-export async function generatePdf(props: PdfDocumentProps): Promise<Buffer> {
-  const isProd = process.env.NODE_ENV === "production";
+function getChromiumPath(): string | null {
+  // Explicit override via env var (set this in Render/Railway dashboard)
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
 
+  // Common Linux paths (Render, Railway, etc.)
+  const { existsSync } = require("fs");
+  const linuxPaths = [
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/snap/bin/chromium",
+  ];
+  for (const p of linuxPaths) {
+    if (existsSync(p)) return p;
+  }
+
+  return null;
+}
+
+export async function generatePdf(props: PdfDocumentProps): Promise<Buffer> {
+  const puppeteer = await import("puppeteer-core");
+  const html = await buildHtml(props);
+
+  const systemChrome = getChromiumPath();
   let browser;
-  if (isProd) {
+
+  if (systemChrome) {
+    // Render / Railway / any Linux server with Chromium installed
+    browser = await puppeteer.default.launch({
+      executablePath: systemChrome,
+      headless: true,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--single-process",
+        "--no-zygote",
+      ],
+    });
+  } else if (process.env.NODE_ENV === "production") {
+    // Lambda / Vercel serverless — use sparticuz chromium
     const chromium = await import("@sparticuz/chromium");
-    const puppeteer = await import("puppeteer-core");
     browser = await puppeteer.default.launch({
       args: chromium.default.args,
       defaultViewport: chromium.default.defaultViewport,
@@ -49,16 +81,12 @@ export async function generatePdf(props: PdfDocumentProps): Promise<Buffer> {
       headless: true,
     });
   } else {
-    // Local dev: needs Chrome installed at the system path
-    const puppeteer = await import("puppeteer-core");
+    // Local Windows/Mac dev
     browser = await puppeteer.default.launch({
       executablePath:
-        process.env.PUPPETEER_EXECUTABLE_PATH ||
-        (process.platform === "win32"
+        process.platform === "win32"
           ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-          : process.platform === "darwin"
-          ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-          : "/usr/bin/google-chrome"),
+          : "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
@@ -67,8 +95,6 @@ export async function generatePdf(props: PdfDocumentProps): Promise<Buffer> {
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 794, height: 1123 });
-
-    const html = await buildHtml(props);
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
 
     const pdf = await page.pdf({
