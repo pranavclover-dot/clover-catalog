@@ -107,6 +107,23 @@ export default function HomePage() {
 
       for (let i = 0; i < pageEls.length; i++) {
         const el = pageEls[i];
+
+        // Collect all clickable links BEFORE rendering (positions are in CSS px)
+        const pageRect = el.getBoundingClientRect();
+        const linkAnnotations: { x: number; y: number; w: number; h: number; url: string }[] = [];
+        el.querySelectorAll<HTMLAnchorElement>("a[href]").forEach((a) => {
+          const r = a.getBoundingClientRect();
+          const url = a.getAttribute("href") ?? "";
+          if (!url || url.startsWith("javascript")) return;
+          linkAnnotations.push({
+            x: r.left - pageRect.left,
+            y: r.top - pageRect.top,
+            w: r.width || 200,
+            h: r.height || 24,
+            url,
+          });
+        });
+
         const canvas = await html2canvas(el, {
           scale: 2,
           useCORS: true,
@@ -120,6 +137,11 @@ export default function HomePage() {
         if (i > 0) pdf.addPage([794, 1123], "portrait");
         const imgData = canvas.toDataURL("image/jpeg", 0.92);
         pdf.addImage(imgData, "JPEG", 0, 0, 794, 1123);
+
+        // Add clickable link overlays on top of the image
+        for (const lnk of linkAnnotations) {
+          pdf.link(lnk.x, lnk.y, lnk.w, lnk.h, { url: lnk.url });
+        }
       }
 
       const blob = pdf.output("blob");

@@ -9,7 +9,7 @@ export const BRAND = {
   },
   phone: "+91 9220709424",
   email: "contact@theclover.in",
-  website: "www.theclover.com",
+  website: "www.theclover.in",
   primaryColor: "#0e6b3a",
   cream: "#f8f5f0",
 } as const;
