@@ -164,27 +164,32 @@ export default function Cover({
         {/* ── HERO PRODUCT CODE ── */}
         <div
           style={{
-            fontSize: "76px",
+            fontSize: "72px",
             fontWeight: 900,
             color: "#ffffff",
             letterSpacing: "-0.03em",
-            lineHeight: 1,
-            marginBottom: "10px",
+            lineHeight: 1.15,
+            marginBottom: "18px",
             textShadow: "0 2px 24px rgba(0,0,0,0.4)",
+            display: "block",
           }}
         >
           {productCode}
         </div>
 
-        {/* Description */}
+        {/* Description — capped at 4 lines so it never overflows */}
         <div
           style={{
             fontSize: "12px",
             color: "rgba(255,255,255,0.75)",
-            lineHeight: "1.55",
+            lineHeight: "1.6",
             maxWidth: "560px",
             marginBottom: "14px",
             letterSpacing: "0.01em",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 4,
+            WebkitBoxOrient: "vertical",
           }}
         >
           {description}
