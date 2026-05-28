@@ -157,7 +157,7 @@ export default function HomePage() {
       >
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover logo.png" alt="Clover" className="w-8 h-8 object-contain" />
+          <img src="/clover-logo.png" alt="Clover" className="w-8 h-8 object-contain" />
           <div>
             <div className="font-black text-sm tracking-widest">{BRAND.wordmark}®</div>
             <div className="text-[9px] tracking-[0.2em] opacity-80">{BRAND.tagline}</div>

@@ -113,7 +113,7 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
         {/* Left: logo — PNG already includes wordmark + tagline */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover logo.png" alt="Clover" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
+          <img src="/clover-logo.png" alt="Clover" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
         </div>
 
         {/* Right: "CONTACT" label */}
@@ -200,7 +200,7 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
         }}>
           {/* Logo PNG — already includes wordmark text */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover logo.png" alt="" style={{ height: "28px", width: "auto" }} />
+          <img src="/clover-logo.png" alt="" style={{ height: "28px", width: "auto" }} />
         </div>
       </div>
 

@@ -62,7 +62,7 @@ export default function BrandHeader() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/clover logo.png"
+            src="/clover-logo.png"
             alt=""
             style={{ width: "64px", height: "64px", objectFit: "contain" }}
           />

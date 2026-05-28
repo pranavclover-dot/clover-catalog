@@ -82,7 +82,7 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         {/* Left: logo (PNG includes wordmark) + page label */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover logo.png" alt="Clover" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
+          <img src="/clover-logo.png" alt="Clover" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
           <div style={{ width: "1px", height: "28px", backgroundColor: "rgba(255,255,255,0.2)" }} />
           <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "8px", letterSpacing: "0.28em", textTransform: "uppercase", fontWeight: 700 }}>
             PRODUCT GALLERY
@@ -130,7 +130,7 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/Clover green .png"
+            src="/clover-green.png"
             alt=""
             style={{ height: "100%", width: "auto", objectFit: "contain", display: "block" }}
           />

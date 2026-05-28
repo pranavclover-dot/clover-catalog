@@ -93,7 +93,7 @@ export default function Cover({
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/clover logo.png"
+          src="/clover-logo.png"
           alt="Clover"
           style={{ height: "46px", width: "auto", objectFit: "contain" }}
         />
