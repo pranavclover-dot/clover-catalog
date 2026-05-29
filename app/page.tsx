@@ -187,23 +187,17 @@ export default function HomePage() {
     setUploading(true);
     try {
       const { upload } = await import("@vercel/blob/client");
-      const blob = await fetch(pdfUrl).then((r) => r.blob());
-      const file = new File([blob], `${productCode.trim().replace(/\s+/g, "_")}_${Date.now()}.pdf`, { type: "application/pdf" });
+      const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
-      const uploaded = await upload(`catalogs/${category}/${file.name}`, file, {
+      // Encode metadata in filename: CODE__TYPE__TIMESTAMP.pdf
+      const safeCode = productCode.trim().replace(/\s+/g, "_");
+      const safeType = (productType.trim() || "-").replace(/\s+/g, "_");
+      const filename = `${safeCode}__${safeType}__${Date.now()}.pdf`;
+      const file = new File([blobData], filename, { type: "application/pdf" });
+
+      await upload(`catalogs/${category}/${filename}`, file, {
         access: "public",
         handleUploadUrl: "/api/catalog/upload",
-      });
-
-      await fetch("/api/catalog/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category,
-          productCode: productCode.trim(),
-          productType: productType.trim(),
-          fileUrl: uploaded.url,
-        }),
       });
 
       setUploadDone(true);
