@@ -22,6 +22,8 @@ export default function HomePage() {
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadDone, setUploadDone] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -180,9 +182,41 @@ export default function HomePage() {
     window.open(`https://wa.me/?text=${text}`, "_blank");
   };
 
+  const handleUploadToCatalog = async () => {
+    if (!pdfUrl) return;
+    setUploading(true);
+    try {
+      const { upload } = await import("@vercel/blob/client");
+      const blob = await fetch(pdfUrl).then((r) => r.blob());
+      const file = new File([blob], `${productCode.trim().replace(/\s+/g, "_")}_${Date.now()}.pdf`, { type: "application/pdf" });
+
+      const uploaded = await upload(`catalogs/${category}/${file.name}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/catalog/upload",
+      });
+
+      await fetch("/api/catalog/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category,
+          productCode: productCode.trim(),
+          productType: productType.trim(),
+          fileUrl: uploaded.url,
+        }),
+      });
+
+      setUploadDone(true);
+    } catch (err) {
+      alert("Upload failed: " + (err instanceof Error ? err.message : "Unknown error"));
+    }
+    setUploading(false);
+  };
+
   const handleReset = () => {
     if (pdfUrl) URL.revokeObjectURL(pdfUrl);
     setPdfUrl(null);
+    setUploadDone(false);
     setStep("form");
     setError(null);
     setPhotos([]);
@@ -286,6 +320,31 @@ export default function HomePage() {
                 </svg>
                 Share on WhatsApp
               </button>
+
+              {/* Upload to Catalog */}
+              {!uploadDone ? (
+                <button
+                  onClick={handleUploadToCatalog}
+                  disabled={uploading}
+                  className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+                  style={{ backgroundColor: "#f0f7f3", color: "#0e6b3a", border: "2px solid #0e6b3a" }}
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: "#0e6b3a", borderTopColor: "transparent" }} />
+                      Uploading…
+                    </>
+                  ) : (
+                    <>
+                      ☁️ Add to Catalog Library
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="w-full py-3.5 rounded-xl text-sm text-center font-semibold" style={{ backgroundColor: "#f0f7f3", color: "#0e6b3a" }}>
+                  ✓ Added to Catalog Library
+                </div>
+              )}
 
               <button
                 onClick={handleReset}
