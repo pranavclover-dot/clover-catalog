@@ -3,7 +3,6 @@
 import { useState, useRef, useCallback } from "react";
 import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PHOTO } from "@/lib/categories";
 import { BRAND } from "@/lib/brand";
-import { PRICES } from "@/lib/prices";
 import Cover from "@/app/_pdf/Cover";
 import PhotoPage from "@/app/_pdf/PhotoPage";
 import ContactPage from "@/app/_pdf/ContactPage";
@@ -249,8 +248,6 @@ export default function HomePage() {
               productCode={productCode}
               productType={productType}
               lifestylePhotoSrc={coverPhoto}
-              price={PRICES[productCode.trim().toUpperCase()]?.price}
-              mrp={PRICES[productCode.trim().toUpperCase()]?.mrp}
             />
           </div>
 

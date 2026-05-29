@@ -8,8 +8,6 @@ interface CoverProps {
   productCode: string;
   productType: string;
   lifestylePhotoSrc: string;
-  price?: number;
-  mrp?: number;
 }
 
 export default function Cover({
@@ -17,8 +15,6 @@ export default function Cover({
   productCode,
   productType,
   lifestylePhotoSrc,
-  price,
-  mrp,
 }: CoverProps) {
   return (
     <div
@@ -173,49 +169,13 @@ export default function Cover({
               color: "rgba(255,255,255,0.80)",
               letterSpacing: "0.04em",
               textTransform: "uppercase",
-              marginBottom: "14px",
+              marginBottom: "18px",
             }}
           >
             {productType}
           </div>
         )}
-        {!productType && <div style={{ marginBottom: "14px" }} />}
-
-        {/* ── PRICING BLOCK ── */}
-        {price && mrp && (
-          <div style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "18px" }}>
-            {/* Our Price */}
-            <div
-              style={{
-                backgroundColor: "#2ecc71",
-                WebkitPrintColorAdjust: "exact",
-                printColorAdjust: "exact",
-                borderRadius: "8px",
-                padding: "8px 20px",
-                display: "inline-flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-              }}
-            >
-              <span style={{ fontSize: "9px", fontWeight: 800, color: "#07300f", letterSpacing: "0.18em", textTransform: "uppercase" }}>
-                Factory Price
-              </span>
-              <span style={{ fontSize: "32px", fontWeight: 900, color: "#07300f", lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-                ₹{price}
-              </span>
-            </div>
-            {/* MRP strikethrough */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-              <span style={{ fontSize: "11px", color: "rgba(255,255,255,0.45)", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>
-                MRP
-              </span>
-              <span style={{ fontSize: "24px", fontWeight: 700, color: "rgba(255,255,255,0.45)", textDecoration: "line-through", letterSpacing: "-0.01em" }}>
-                ₹{mrp}
-              </span>
-            </div>
-          </div>
-        )}
-        {(!price || !mrp) && <div style={{ marginBottom: "18px" }} />}
+        {!productType && <div style={{ marginBottom: "18px" }} />}
 
         {/* ── CONTACT STRIP ── */}
         <div
