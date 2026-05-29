@@ -16,8 +16,14 @@ export default function CatalogPage() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [copiedCat, setCopiedCat] = useState<string | null>(null);
 
   useEffect(() => {
+    // Read ?category= from URL on load
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    if (cat) setActiveCategory(cat);
+
     fetch("/api/catalog/list")
       .then((r) => r.json())
       .then(({ entries }) => {
@@ -33,6 +39,16 @@ export default function CatalogPage() {
     activeCategory === "All"
       ? entries
       : entries.filter((e) => e.category === activeCategory);
+
+  const copyLink = (cat: string) => {
+    const url = cat === "All"
+      ? window.location.origin + "/catalog"
+      : `${window.location.origin}/catalog?category=${encodeURIComponent(cat)}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopiedCat(cat);
+      setTimeout(() => setCopiedCat(null), 2000);
+    });
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "#f8f5f0", fontFamily: "'Inter', sans-serif" }}>
@@ -65,27 +81,55 @@ export default function CatalogPage() {
 
         {/* Category tabs */}
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "28px" }}>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              style={{
-                padding: "8px 18px",
-                borderRadius: "100px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "13px",
-                fontWeight: 600,
-                letterSpacing: "0.02em",
-                backgroundColor: activeCategory === cat ? "#0e6b3a" : "white",
-                color: activeCategory === cat ? "white" : "#444",
-                boxShadow: activeCategory === cat ? "none" : "0 1px 4px rgba(0,0,0,0.08)",
-                transition: "all 0.15s",
-              }}
-            >
-              {cat}
-            </button>
-          ))}
+          {categories.map((cat) => {
+            const isActive = activeCategory === cat;
+            const isCopied = copiedCat === cat;
+            return (
+              <div key={cat} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                <button
+                  onClick={() => setActiveCategory(cat)}
+                  style={{
+                    padding: "8px 18px",
+                    borderRadius: "100px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                    backgroundColor: isActive ? "#0e6b3a" : "white",
+                    color: isActive ? "white" : "#444",
+                    boxShadow: isActive ? "none" : "0 1px 4px rgba(0,0,0,0.08)",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  {cat}
+                </button>
+                {/* Copy link icon */}
+                <button
+                  onClick={() => copyLink(cat)}
+                  title={`Copy link for ${cat}`}
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    border: "none",
+                    cursor: "pointer",
+                    backgroundColor: isCopied ? "#0e6b3a" : "white",
+                    color: isCopied ? "white" : "#888",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "13px",
+                    transition: "all 0.15s",
+                    flexShrink: 0,
+                  }}
+                >
+                  {isCopied ? "✓" : "🔗"}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {/* Loading */}
