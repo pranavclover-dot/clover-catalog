@@ -1,68 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
+import { list, put } from "@vercel/blob";
 
-const SHOP = () => process.env.SHOPIFY_SHOP!;
-const TOKEN = () => process.env.SHOPIFY_ACCESS_TOKEN!;
-const API = "2024-01";
-
-async function gql(query: string, variables?: object) {
-  const res = await fetch(`https://${SHOP()}/admin/api/${API}/graphql.json`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Access-Token": TOKEN(),
-    },
-    body: JSON.stringify({ query, variables }),
-  });
-  return res.json();
-}
-
-async function ensureDefinition() {
-  await gql(`
-    mutation {
-      metaobjectDefinitionCreate(definition: {
-        name: "Catalog Entry"
-        type: "catalog_entry"
-        fieldDefinitions: [
-          { name: "Product Code", key: "product_code", type: "single_line_text_field" }
-          { name: "Category",     key: "category",     type: "single_line_text_field" }
-          { name: "Product Type", key: "product_type", type: "single_line_text_field" }
-          { name: "File URL",     key: "file_url",     type: "url" }
-        ]
-      }) {
-        metaobjectDefinition { id }
-        userErrors { field message }
-      }
-    }
-  `);
-}
+const MANIFEST = "catalog-manifest.json";
 
 export async function POST(req: NextRequest) {
   const { category, productCode, productType, fileUrl } = await req.json();
 
-  // Create definition if first time (errors silently if already exists)
-  try { await ensureDefinition(); } catch {}
-
-  const result = await gql(
-    `mutation Create($fields: [MetaobjectFieldInput!]!) {
-       metaobjectCreate(metaobject: { type: "catalog_entry", fields: $fields }) {
-         metaobject { id handle }
-         userErrors { field message }
-       }
-     }`,
-    {
-      fields: [
-        { key: "product_code", value: productCode },
-        { key: "category",     value: category },
-        { key: "product_type", value: productType || "" },
-        { key: "file_url",     value: fileUrl },
-      ],
+  // Read existing manifest
+  let entries: object[] = [];
+  try {
+    const { blobs } = await list({ prefix: MANIFEST });
+    if (blobs.length > 0) {
+      const res = await fetch(blobs[0].url + "?nocache=" + Date.now());
+      entries = await res.json();
     }
-  );
+  } catch {}
 
-  const errors = result.data?.metaobjectCreate?.userErrors;
-  if (errors?.length) {
-    return NextResponse.json({ error: errors }, { status: 400 });
-  }
+  // Prepend new entry
+  entries.unshift({
+    id: Date.now().toString(),
+    category,
+    product_code: productCode,
+    product_type: productType || "",
+    file_url: fileUrl,
+    createdAt: new Date().toISOString(),
+  });
+
+  // Write manifest back (overwrite, no random suffix)
+  await put(MANIFEST, JSON.stringify(entries), {
+    access: "public",
+    contentType: "application/json",
+    addRandomSuffix: false,
+  });
 
   return NextResponse.json({ success: true });
 }
