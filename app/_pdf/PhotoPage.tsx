@@ -1,14 +1,6 @@
 /**
  * Gallery page — A4 portrait (794×1123px at 96dpi).
- *
- * Design system (matches Cover & ContactPage):
- *   • Same green header: logo + "PRODUCT GALLERY" + page number
- *   • 3px bright-green accent rule under header (matches cover's accent)
- *   • Two full-width photos filling the body
- *   • Green watermark separator between photos
- *   • Green footer with brand name + website (mirrors cover contact language)
  */
-import { BRAND } from "@/lib/brand";
 
 interface PhotoPageProps {
   topPhoto: string;
@@ -20,7 +12,8 @@ function PhotoCard({ src, alt }: { src: string; alt: string }) {
   return (
     <div
       style={{
-        margin: "0 28px",
+        marginLeft: "28px",
+        marginRight: "28px",
         flex: 1,
         borderRadius: "14px",
         overflow: "hidden",
@@ -43,14 +36,14 @@ function EmptyCard() {
   return (
     <div
       style={{
-        margin: "0 28px",
+        marginLeft: "28px",
+        marginRight: "28px",
         flex: 1,
         borderRadius: "14px",
         backgroundColor: "#e8f0ea",
         WebkitPrintColorAdjust: "exact",
         printColorAdjust: "exact",
         flexShrink: 0,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.10)",
       }}
     />
   );
@@ -69,7 +62,7 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         overflow: "hidden",
       }}
     >
-      {/* ══ HEADER — green bar (matches cover top bar DNA) ══ */}
+      {/* ══ HEADER ══ */}
       <div
         style={{
           height: "64px",
@@ -83,7 +76,6 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
           flexShrink: 0,
         }}
       >
-        {/* Left: logo (PNG includes wordmark) + page label */}
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/clover-logo.png" alt="Clover" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
@@ -93,7 +85,6 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
           </div>
         </div>
 
-        {/* Right: page number */}
         {pageNumber !== undefined && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
             <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700 }}>
@@ -106,44 +97,38 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         )}
       </div>
 
-      {/* Bright green accent rule — same as cover */}
+      {/* Accent rule */}
       <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
 
-      {/* ══ PHOTOS AREA — fills all remaining height ══ */}
+      {/* ══ PHOTOS AREA — fills all remaining height, padding top+bottom ══ */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
+          paddingTop: "20px",
+          paddingBottom: "20px",
         }}
       >
         <PhotoCard src={topPhoto} alt="Product photo" />
 
-        {/* Separator — thin rule with clover favicon centred */}
+        {/* Separator — thin rule with clover favicon */}
         <div
           style={{
-            height: "48px",
+            height: "44px",
             flexShrink: 0,
-            backgroundColor: "#ffffff",
             display: "flex",
             alignItems: "center",
             padding: "0 44px",
           }}
         >
-          {/* Left line */}
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.25 }} />
-          {/* Centre icon */}
-          <div style={{ padding: "0 16px", display: "flex", alignItems: "center" }}>
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
+          <div style={{ padding: "0 14px", display: "flex", alignItems: "center" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/clover-green.png"
-              alt=""
-              style={{ height: "22px", width: "auto", objectFit: "contain", display: "block" }}
-            />
+            <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", objectFit: "contain", display: "block" }} />
           </div>
-          {/* Right line */}
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.25 }} />
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
         </div>
 
         {bottomPhoto ? (
@@ -151,33 +136,6 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
         ) : (
           <EmptyCard />
         )}
-      </div>
-
-      {/* ══ FOOTER — green bar with brand info ══ */}
-      <div
-        style={{
-          height: "36px",
-          backgroundColor: "#0e6b3a",
-          WebkitPrintColorAdjust: "exact",
-          printColorAdjust: "exact",
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          padding: "0 44px",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600 }}>
-          {BRAND.companyName}
-        </div>
-        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
-        <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", fontWeight: 500 }}>
-          {BRAND.website}
-        </div>
-        <div style={{ width: "3px", height: "3px", borderRadius: "50%", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
-        <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", fontWeight: 500 }}>
-          {BRAND.phone}
-        </div>
       </div>
     </div>
   );

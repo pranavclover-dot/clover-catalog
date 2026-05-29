@@ -19,7 +19,6 @@ export default function HomePage() {
   const [category, setCategory] = useState("");
   const [productCode, setProductCode] = useState("");
   const [productType, setProductType] = useState("");
-  const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +28,6 @@ export default function HomePage() {
 
   const handleCategoryChange = (val: string) => {
     setCategory(val);
-    if (CATEGORIES[val]) setDescription(CATEGORIES[val]);
   };
 
   const compressImage = useCallback((file: File): Promise<string> => {
@@ -190,7 +188,6 @@ export default function HomePage() {
     setPhotos([]);
     setProductCode("");
     setProductType("");
-    setDescription("");
     setCategory("");
   };
 
@@ -372,20 +369,6 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* Description */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Product description…"
-                  rows={5}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm resize-none focus:outline-none focus:ring-2"
-                  style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
-                />
-              </div>
 
               {/* Photo upload */}
               <div className="flex flex-col gap-2">

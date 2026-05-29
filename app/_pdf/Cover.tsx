@@ -135,7 +135,7 @@ export default function Cover({
             strokeLinecap="round" strokeLinejoin="round" style={{ width: "13px", height: "13px", flexShrink: 0 }}>
             <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
           </svg>
-          <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", letterSpacing: "0.03em", fontWeight: 600, whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.88)", letterSpacing: "0.02em", fontWeight: 700, whiteSpace: "nowrap" }}>
             {BRAND.companyName} &nbsp;·&nbsp; {BRAND.address.line1} {BRAND.address.line2}, {BRAND.address.line3}
           </div>
         </a>
