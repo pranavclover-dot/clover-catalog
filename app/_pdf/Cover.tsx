@@ -1,36 +1,19 @@
 /**
  * Cover page — A4 portrait (794×1123px at 96dpi)
- *
- * Full-bleed magazine cover style (RH / CB2 / Four Hands inspired):
- *
- *   ┌─────────────────────────────────┐
- *   │  LIFESTYLE PHOTO (full page)    │  ← fills entire 794×1123
- *   │                                 │
- *   │  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  │  ← top: brand bar overlay
- *   │                                 │
- *   │                                 │
- *   │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░  │  ← bottom: green gradient
- *   │  [CATEGORY]                     │
- *   │  PRODUCT                        │
- *   │  CODE     ← huge white type     │
- *   │  ── accent rule ──              │
- *   │  Description                    │
- *   │  ─────────── contact bar ─────  │
- *   └─────────────────────────────────┘
  */
 import { BRAND } from "@/lib/brand";
 
 interface CoverProps {
   category: string;
   productCode: string;
-  description: string;
+  productType: string;
   lifestylePhotoSrc: string;
 }
 
 export default function Cover({
   category,
   productCode,
-  description,
+  productType,
   lifestylePhotoSrc,
 }: CoverProps) {
   return (
@@ -44,9 +27,7 @@ export default function Cover({
         overflow: "hidden",
       }}
     >
-      {/* ══════════════════════════════════════
-          FULL-BLEED HERO PHOTO
-      ══════════════════════════════════════ */}
+      {/* ── FULL-BLEED HERO PHOTO ── */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={lifestylePhotoSrc}
@@ -62,24 +43,21 @@ export default function Cover({
         }}
       />
 
-      {/* ══ Bottom gradient overlay for legible text ══ */}
+      {/* ── Bottom gradient overlay ── */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          height: "600px",
-          background: "linear-gradient(to top, rgba(4,22,11,0.97) 0%, rgba(6,28,14,0.93) 30%, rgba(7,31,16,0.72) 60%, rgba(7,31,16,0) 100%)",
+          height: "580px",
+          background: "linear-gradient(to top, rgba(4,22,11,0.98) 0%, rgba(6,28,14,0.93) 35%, rgba(7,31,16,0.65) 65%, rgba(7,31,16,0) 100%)",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
         }}
       />
 
-      {/* ══════════════════════════════════════
-          TOP BAR — solid green brand identity
-      ══════════════════════════════════════ */}
-      {/* ── Green header bar — logo centered ── */}
+      {/* ── GREEN HEADER BAR — logo centered ── */}
       <div
         style={{
           position: "absolute",
@@ -103,10 +81,10 @@ export default function Cover({
         />
       </div>
 
-      {/* Bright accent rule under header */}
-      <div style={{ position: "absolute", top: "68px", left: 0, right: 0, height: "3px", backgroundColor: "#2ecc71" }} />
+      {/* Accent rule under header */}
+      <div style={{ position: "absolute", top: "68px", left: 0, right: 0, height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
 
-      {/* ── Category pill — below header, centered on the photo ── */}
+      {/* ── CATEGORY PILL — below header ── */}
       <div
         style={{
           position: "absolute",
@@ -120,12 +98,15 @@ export default function Cover({
         <div
           style={{
             backgroundColor: "#0e6b3a",
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
             color: "white",
             fontSize: "13px",
             fontWeight: 800,
             letterSpacing: "0.25em",
             padding: "10px 36px",
             textTransform: "uppercase",
+            textAlign: "center",
             border: "2px solid rgba(255,255,255,0.25)",
           }}
         >
@@ -133,9 +114,7 @@ export default function Cover({
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          BOTTOM TEXT BLOCK — overlaid on photo
-      ══════════════════════════════════════ */}
+      {/* ── BOTTOM TEXT BLOCK ── */}
       <div
         style={{
           position: "absolute",
@@ -147,8 +126,11 @@ export default function Cover({
           flexDirection: "column",
         }}
       >
-        {/* ── ADDRESS — above the product code ── */}
-        <a href="https://share.google/P1bvtwyxU3HO2GR2I" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}>
+        {/* Address */}
+        <a
+          href="https://share.google/P1bvtwyxU3HO2GR2I"
+          style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2"
             strokeLinecap="round" strokeLinejoin="round" style={{ width: "13px", height: "13px", flexShrink: 0 }}>
             <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
@@ -158,52 +140,52 @@ export default function Cover({
           </div>
         </a>
 
-        {/* Thin green accent line */}
-        <div style={{ width: "56px", height: "3px", backgroundColor: "#2ecc71", marginBottom: "10px" }} />
+        {/* Accent line */}
+        <div style={{ width: "56px", height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", marginBottom: "12px" }} />
 
-        {/* ── HERO PRODUCT CODE ── */}
+        {/* ── PRODUCT CODE — always uppercase ── */}
         <div
           style={{
             fontSize: "72px",
             fontWeight: 900,
             color: "#ffffff",
-            letterSpacing: "-0.03em",
-            lineHeight: 1.15,
-            marginBottom: "18px",
+            letterSpacing: "-0.02em",
+            lineHeight: 1.1,
+            marginBottom: "10px",
             textShadow: "0 2px 24px rgba(0,0,0,0.4)",
+            textTransform: "uppercase",
             display: "block",
           }}
         >
           {productCode}
         </div>
 
-        {/* Description — capped at 4 lines so it never overflows */}
-        <div
-          style={{
-            fontSize: "12px",
-            color: "rgba(255,255,255,0.75)",
-            lineHeight: "1.6",
-            maxWidth: "560px",
-            marginBottom: "14px",
-            letterSpacing: "0.01em",
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 4,
-            WebkitBoxOrient: "vertical",
-          }}
-        >
-          {description}
-        </div>
+        {/* ── TYPE / SUB-HEADING ── */}
+        {productType && (
+          <div
+            style={{
+              fontSize: "18px",
+              fontWeight: 600,
+              color: "rgba(255,255,255,0.80)",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+              marginBottom: "18px",
+            }}
+          >
+            {productType}
+          </div>
+        )}
+        {!productType && <div style={{ marginBottom: "18px" }} />}
 
-        {/* ══ CONTACT STRIP ══ */}
+        {/* ── CONTACT STRIP ── */}
         <div
           style={{
             borderTop: "1px solid rgba(255,255,255,0.18)",
-            paddingTop: "12px",
-            paddingBottom: "20px",
+            paddingTop: "14px",
+            paddingBottom: "22px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0" }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             {([
               {
                 label: "Website",

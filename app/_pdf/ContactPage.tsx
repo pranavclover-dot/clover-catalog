@@ -29,8 +29,8 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "20px",
-        padding: "14px 0",
+        gap: "24px",
+        padding: "18px 0",
         borderBottom: "1px solid #f0f0f0",
         textDecoration: "none",
         color: "inherit",
@@ -39,8 +39,8 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
       {/* Bright-green icon circle */}
       <div
         style={{
-          width: "44px",
-          height: "44px",
+          width: "56px",
+          height: "56px",
           borderRadius: "50%",
           backgroundColor: "#0e6b3a",
           WebkitPrintColorAdjust: "exact",
@@ -60,23 +60,23 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
         }} />
         <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"
           strokeLinecap="round" strokeLinejoin="round"
-          style={{ width: "18px", height: "18px" }}>
+          style={{ width: "22px", height: "22px" }}>
           <path d={icon} />
         </svg>
       </div>
 
       <div style={{ flex: 1 }}>
         <div style={{
-          fontSize: "8px",
+          fontSize: "10px",
           color: "#aaa",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
           fontWeight: 700,
-          marginBottom: "3px",
+          marginBottom: "5px",
         }}>
           {label}
         </div>
-        <div style={{ fontSize: "15px", fontWeight: 700, color: "#111", letterSpacing: "0.01em" }}>
+        <div style={{ fontSize: "20px", fontWeight: 700, color: "#111", letterSpacing: "0.01em" }}>
           {value}
         </div>
       </div>

@@ -120,24 +120,30 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
       >
         <PhotoCard src={topPhoto} alt="Product photo" />
 
-        {/* Separator — Clover green image on white background */}
+        {/* Separator — thin rule with clover favicon centred */}
         <div
           style={{
-            height: "52px",
+            height: "48px",
             flexShrink: 0,
             backgroundColor: "#ffffff",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
-            overflow: "hidden",
+            padding: "0 44px",
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/clover-green.png"
-            alt=""
-            style={{ height: "100%", width: "auto", objectFit: "contain", display: "block" }}
-          />
+          {/* Left line */}
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.25 }} />
+          {/* Centre icon */}
+          <div style={{ padding: "0 16px", display: "flex", alignItems: "center" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/clover-green.png"
+              alt=""
+              style={{ height: "22px", width: "auto", objectFit: "contain", display: "block" }}
+            />
+          </div>
+          {/* Right line */}
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.25 }} />
         </div>
 
         {bottomPhoto ? (

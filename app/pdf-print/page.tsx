@@ -78,7 +78,7 @@ export default function PdfPrintPage() {
         Your catalog is ready! In the print dialog → change destination to <strong>"Save as PDF"</strong> → click Save.
       </div>
 
-      <div className="page"><Cover category={job.category} productCode={job.productCode} description={job.description} lifestylePhotoSrc={coverPhoto} /></div>
+      <div className="page"><Cover category={job.category} productCode={job.productCode} productType="" lifestylePhotoSrc={coverPhoto} /></div>
 
       {pairs.map(([top, bottom], idx) => (
         <div className="page" key={idx}>

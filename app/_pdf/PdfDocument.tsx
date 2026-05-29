@@ -55,7 +55,7 @@ export default function PdfDocument({
         <Cover
           category={category}
           productCode={productCode}
-          description={description}
+          productType=""
           lifestylePhotoSrc={lifestylePhotoUri}
         />
       </PageWrapper>

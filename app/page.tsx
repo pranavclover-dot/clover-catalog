@@ -18,6 +18,7 @@ type Step = "form" | "generating" | "done";
 export default function HomePage() {
   const [category, setCategory] = useState("");
   const [productCode, setProductCode] = useState("");
+  const [productType, setProductType] = useState("");
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [step, setStep] = useState<Step>("form");
@@ -188,6 +189,7 @@ export default function HomePage() {
     setError(null);
     setPhotos([]);
     setProductCode("");
+    setProductType("");
     setDescription("");
     setCategory("");
   };
@@ -219,7 +221,7 @@ export default function HomePage() {
             <Cover
               category={category}
               productCode={productCode}
-              description={description}
+              productType={productType}
               lifestylePhotoSrc={coverPhoto}
             />
           </div>
@@ -350,6 +352,21 @@ export default function HomePage() {
                   onChange={(e) => setProductCode(e.target.value)}
                   placeholder="e.g. BS 1 EECO"
                   required
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2"
+                  style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
+                />
+              </div>
+
+              {/* Type / Variant */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Type / Variant <span className="normal-case text-gray-400 font-normal">(optional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={productType}
+                  onChange={(e) => setProductType(e.target.value)}
+                  placeholder="e.g. 100% Cotton · Satin Finish"
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2"
                   style={{ ["--tw-ring-color" as string]: "var(--clover-green)" }}
                 />

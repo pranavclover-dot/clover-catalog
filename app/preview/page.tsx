@@ -33,7 +33,7 @@ export default function PreviewPage() {
         <Cover
           category="Bedsheets"
           productCode="BS 1 EECO"
-          description={sampleDescription}
+          productType=""
           lifestylePhotoSrc={LIFESTYLE_PH}
         />
       </div>
