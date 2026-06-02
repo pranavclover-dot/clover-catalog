@@ -186,7 +186,6 @@ export default function HomePage() {
     if (!pdfUrl) return;
     setUploading(true);
     try {
-      const { upload } = await import("@vercel/blob/client");
       const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
       // Encode metadata in filename: CODE__TYPE__TIMESTAMP.pdf
@@ -195,10 +194,14 @@ export default function HomePage() {
       const filename = `${safeCode}__${safeType}__${Date.now()}.pdf`;
       const file = new File([blobData], filename, { type: "application/pdf" });
 
-      await upload(`catalogs/${category}/${filename}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/catalog/upload",
-      });
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", `catalogs/${category}/${filename}`);
+
+      const res = await fetch("/api/catalog/upload", { method: "POST", body: formData });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error ?? "Upload failed");
 
       setUploadDone(true);
     } catch (err) {
