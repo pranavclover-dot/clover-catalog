@@ -1,55 +1,17 @@
 /**
  * Gallery page — A4 portrait (794×1123px at 96dpi).
+ * Adaptive: 1 photo when portrait/alone, 2 photos when both landscape.
  */
 
 interface PhotoPageProps {
   topPhoto: string;
-  bottomPhoto?: string;
+  bottomPhoto?: string;   // if undefined → single-photo mode
   pageNumber?: number;
 }
 
-function PhotoCard({ src, alt }: { src: string; alt: string }) {
-  return (
-    <div
-      style={{
-        marginLeft: "28px",
-        marginRight: "28px",
-        flex: 1,
-        borderRadius: "14px",
-        overflow: "hidden",
-        flexShrink: 0,
-        position: "relative",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)",
-      }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-      />
-    </div>
-  );
-}
-
-function EmptyCard() {
-  return (
-    <div
-      style={{
-        marginLeft: "28px",
-        marginRight: "28px",
-        flex: 1,
-        borderRadius: "14px",
-        backgroundColor: "#e8f0ea",
-        WebkitPrintColorAdjust: "exact",
-        printColorAdjust: "exact",
-        flexShrink: 0,
-      }}
-    />
-  );
-}
-
 export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPageProps) {
+  const isSingle = !bottomPhoto;
+
   return (
     <div
       style={{
@@ -100,41 +62,96 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
       {/* Accent rule */}
       <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
 
-      {/* ══ PHOTOS AREA — fills all remaining height, padding top+bottom ══ */}
+      {/* ══ PHOTOS AREA ══ */}
       <div
         style={{
           flex: 1,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          paddingTop: "20px",
-          paddingBottom: "20px",
+          padding: isSingle ? "24px 28px" : "20px 0",
         }}
       >
-        <PhotoCard src={topPhoto} alt="Product photo" />
+        {isSingle ? (
 
-        {/* Separator — thin rule with clover favicon */}
-        <div
-          style={{
-            height: "44px",
-            flexShrink: 0,
-            display: "flex",
-            alignItems: "center",
-            padding: "0 44px",
-          }}
-        >
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
-          <div style={{ padding: "0 14px", display: "flex", alignItems: "center" }}>
+          /* ── SINGLE PHOTO — full height, contains the whole image ── */
+          <div
+            style={{
+              flex: 1,
+              borderRadius: "14px",
+              overflow: "hidden",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+              backgroundColor: "#f4f4f4",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", objectFit: "contain", display: "block" }} />
+            <img
+              src={topPhoto}
+              alt="Product photo"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                display: "block",
+              }}
+            />
           </div>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
-        </div>
 
-        {bottomPhoto ? (
-          <PhotoCard src={bottomPhoto} alt="Product photo" />
         ) : (
-          <EmptyCard />
+
+          /* ── TWO PHOTOS — stacked with separator ── */
+          <>
+            {/* Top photo */}
+            <div style={{
+              marginLeft: "28px",
+              marginRight: "28px",
+              flex: 1,
+              borderRadius: "14px",
+              overflow: "hidden",
+              flexShrink: 0,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={topPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            </div>
+
+            {/* Separator */}
+            <div
+              style={{
+                height: "44px",
+                flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                padding: "0 44px",
+              }}
+            >
+              <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
+              <div style={{ padding: "0 14px", display: "flex", alignItems: "center" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", objectFit: "contain", display: "block" }} />
+              </div>
+              <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
+            </div>
+
+            {/* Bottom photo */}
+            <div style={{
+              marginLeft: "28px",
+              marginRight: "28px",
+              flex: 1,
+              borderRadius: "14px",
+              overflow: "hidden",
+              flexShrink: 0,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)",
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={bottomPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+            </div>
+          </>
         )}
       </div>
     </div>

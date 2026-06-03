@@ -175,15 +175,19 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
         />
       </div>
 
-      {/* ══ LIFESTYLE PHOTO — fills all remaining height ══ */}
-      <div style={{ flex: 1, overflow: "hidden", position: "relative", marginTop: "20px" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={lifestylePhotoSrc}
-          alt="Lifestyle"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-        {/* Gradient overlay at top of photo for smooth transition */}
+      {/* ══ LIFESTYLE PHOTO — fills all remaining height (background-image for correct crop) ══ */}
+      <div style={{
+        flex: 1,
+        marginTop: "20px",
+        position: "relative",
+        backgroundImage: `url(${lifestylePhotoSrc})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+        overflow: "hidden",
+      }}>
+        {/* Gradient overlay at top for smooth transition */}
         <div style={{
           position: "absolute",
           top: 0,
@@ -191,18 +195,16 @@ export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
           right: 0,
           height: "60px",
           background: "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
         }} />
-        {/* Brand watermark overlay on photo */}
+        {/* Brand watermark */}
         <div style={{
           position: "absolute",
           bottom: "36px",
           right: "44px",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
           opacity: 0.5,
         }}>
-          {/* Logo PNG — already includes wordmark text */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/clover-logo.png" alt="" style={{ height: "28px", width: "auto" }} />
         </div>

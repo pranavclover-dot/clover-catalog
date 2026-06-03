@@ -1,5 +1,6 @@
 /**
  * Cover page — A4 portrait (794×1123px at 96dpi)
+ * No lifestyle photo — typographic / brand-led design.
  */
 import { BRAND } from "@/lib/brand";
 
@@ -7,15 +8,9 @@ interface CoverProps {
   category: string;
   productCode: string;
   productType: string;
-  lifestylePhotoSrc: string;
 }
 
-export default function Cover({
-  category,
-  productCode,
-  productType,
-  lifestylePhotoSrc,
-}: CoverProps) {
+export default function Cover({ category, productCode, productType }: CoverProps) {
   return (
     <div
       style={{
@@ -25,212 +20,189 @@ export default function Cover({
         fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif",
         position: "relative",
         overflow: "hidden",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {/* ── FULL-BLEED HERO PHOTO ── */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={lifestylePhotoSrc}
-        alt="Lifestyle"
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center",
-          display: "block",
-        }}
-      />
 
-      {/* ── Bottom gradient overlay ── */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: "580px",
-          background: "linear-gradient(to top, rgba(4,22,11,0.98) 0%, rgba(6,28,14,0.93) 35%, rgba(7,31,16,0.65) 65%, rgba(7,31,16,0) 100%)",
-          WebkitPrintColorAdjust: "exact",
-          printColorAdjust: "exact",
-        }}
-      />
+      {/* ── Decorative background rings ── */}
+      <div style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "700px",
+        height: "700px",
+        borderRadius: "50%",
+        border: "1px solid rgba(46,204,113,0.07)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "520px",
+        height: "520px",
+        borderRadius: "50%",
+        border: "1px solid rgba(46,204,113,0.10)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "340px",
+        height: "340px",
+        borderRadius: "50%",
+        border: "1px solid rgba(46,204,113,0.13)",
+        pointerEvents: "none",
+      }} />
 
-      {/* ── GREEN HEADER BAR — logo centered ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "68px",
-          backgroundColor: "#0e6b3a",
-          WebkitPrintColorAdjust: "exact",
-          printColorAdjust: "exact",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      {/* ── TOP GREEN HEADER ── */}
+      <div style={{
+        height: "68px",
+        backgroundColor: "#0e6b3a",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/clover-logo.png" alt="Clover" style={{ height: "46px", width: "auto", objectFit: "contain" }} />
+      </div>
+
+      {/* Accent rule */}
+      <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
+
+      {/* ── CENTER CONTENT ── */}
+      <div style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 60px",
+        textAlign: "center",
+      }}>
+
+        {/* Large logo */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/clover-logo.png"
           alt="Clover"
-          style={{ height: "46px", width: "auto", objectFit: "contain" }}
+          style={{ height: "120px", width: "auto", objectFit: "contain", opacity: 0.18, marginBottom: "48px" }}
         />
-      </div>
 
-      {/* Accent rule under header */}
-      <div style={{ position: "absolute", top: "68px", left: 0, right: 0, height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
-
-      {/* ── CATEGORY PILL — below header ── */}
-      <div
-        style={{
-          position: "absolute",
-          top: "86px",
-          left: 0,
-          right: 0,
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#0e6b3a",
-            WebkitPrintColorAdjust: "exact",
-            printColorAdjust: "exact",
-            color: "white",
-            fontSize: "13px",
-            fontWeight: 800,
-            letterSpacing: "0.25em",
-            padding: "10px 36px",
-            textTransform: "uppercase",
-            textAlign: "center",
-            border: "2px solid rgba(255,255,255,0.25)",
-          }}
-        >
+        {/* Category — very large */}
+        <div style={{
+          fontSize: "96px",
+          fontWeight: 900,
+          color: "#ffffff",
+          letterSpacing: "-0.03em",
+          lineHeight: 0.92,
+          textTransform: "uppercase",
+          marginBottom: "28px",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
+        }}>
           {category}
         </div>
-      </div>
-
-      {/* ── BOTTOM TEXT BLOCK ── */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: "0 44px 0",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* Address */}
-        <a
-          href="https://share.google/P1bvtwyxU3HO2GR2I"
-          style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", textDecoration: "none" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2"
-            strokeLinecap="round" strokeLinejoin="round" style={{ width: "13px", height: "13px", flexShrink: 0 }}>
-            <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0zM12 7a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
-          </svg>
-          <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.88)", letterSpacing: "0.02em", fontWeight: 700, whiteSpace: "nowrap" }}>
-            {BRAND.companyName} &nbsp;·&nbsp; {BRAND.address.line1} {BRAND.address.line2}, {BRAND.address.line3}
-          </div>
-        </a>
 
         {/* Accent line */}
-        <div style={{ width: "56px", height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", marginBottom: "12px" }} />
+        <div style={{
+          width: "64px",
+          height: "3px",
+          backgroundColor: "#2ecc71",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
+          marginBottom: "28px",
+        }} />
 
-        {/* ── PRODUCT CODE — always uppercase ── */}
-        <div
-          style={{
-            fontSize: "72px",
-            fontWeight: 900,
-            color: "#ffffff",
-            letterSpacing: "-0.02em",
-            lineHeight: 1.1,
-            marginBottom: "10px",
-            textShadow: "0 2px 24px rgba(0,0,0,0.4)",
-            textTransform: "uppercase",
-            display: "block",
-          }}
-        >
+        {/* Product code */}
+        <div style={{
+          fontSize: "42px",
+          fontWeight: 800,
+          color: "rgba(255,255,255,0.75)",
+          letterSpacing: "-0.01em",
+          textTransform: "uppercase",
+          marginBottom: productType ? "10px" : "0",
+        }}>
           {productCode}
         </div>
 
-        {/* ── TYPE / SUB-HEADING ── */}
+        {/* Product type */}
         {productType && (
-          <div
-            style={{
-              fontSize: "18px",
-              fontWeight: 600,
-              color: "rgba(255,255,255,0.80)",
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              marginBottom: "18px",
-            }}
-          >
+          <div style={{
+            fontSize: "18px",
+            fontWeight: 500,
+            color: "rgba(255,255,255,0.40)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+          }}>
             {productType}
           </div>
         )}
-        {!productType && <div style={{ marginBottom: "18px" }} />}
+      </div>
 
-        {/* ── CONTACT STRIP ── */}
-        <div
-          style={{
-            borderTop: "1px solid rgba(255,255,255,0.18)",
-            paddingTop: "14px",
-            paddingBottom: "22px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center" }}>
-            {([
-              {
-                label: "Website",
-                text: BRAND.website,
-                href: `https://${BRAND.website}`,
-                d: "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
-              },
-              {
-                label: "Phone",
-                text: BRAND.phone,
-                href: `tel:${BRAND.phone.replace(/\s/g, "")}`,
-                d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .09 1.18 2 2 0 0 1 2 .05h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z",
-              },
-              {
-                label: "Email",
-                text: BRAND.email,
-                href: `mailto:${BRAND.email}`,
-                d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6",
-              },
-            ] as { label: string; text: string; href: string; d: string }[]).map(({ label, text, href, d }, i) => (
-              <a key={label} href={href} style={{ display: "flex", alignItems: "center", gap: "10px", flexShrink: 0, textDecoration: "none" }}>
-                {i > 0 && (
-                  <div style={{ width: "1px", height: "32px", backgroundColor: "rgba(255,255,255,0.15)", margin: "0 20px" }} />
-                )}
-                <div style={{
-                  width: "34px", height: "34px", borderRadius: "50%",
-                  backgroundColor: "rgba(46,204,113,0.15)", border: "1px solid rgba(46,204,113,0.45)",
-                  display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2"
-                    strokeLinecap="round" strokeLinejoin="round" style={{ width: "15px", height: "15px" }}>
-                    <path d={d} />
-                  </svg>
+      {/* ── BOTTOM CONTACT STRIP ── */}
+      <div style={{
+        padding: "0 44px",
+        borderTop: "1px solid rgba(255,255,255,0.10)",
+        flexShrink: 0,
+        paddingTop: "20px",
+        paddingBottom: "24px",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          {([
+            {
+              label: "Website",
+              text: BRAND.website,
+              href: `https://${BRAND.website}`,
+              d: "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+            },
+            {
+              label: "Phone",
+              text: BRAND.phone,
+              href: `tel:${BRAND.phone.replace(/\s/g, "")}`,
+              d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .09 1.18 2 2 0 0 1 2 .05h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z",
+            },
+            {
+              label: "Email",
+              text: BRAND.email,
+              href: `mailto:${BRAND.email}`,
+              d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6",
+            },
+          ] as { label: string; text: string; href: string; d: string }[]).map(({ label, text, href, d }) => (
+            <a key={label} href={href} style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+              <div style={{
+                width: "34px", height: "34px", borderRadius: "50%",
+                backgroundColor: "rgba(46,204,113,0.15)",
+                border: "1px solid rgba(46,204,113,0.45)",
+                WebkitPrintColorAdjust: "exact",
+                printColorAdjust: "exact",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#2ecc71" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round" style={{ width: "15px", height: "15px" }}>
+                  <path d={d} />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "2px" }}>
+                  {label}
                 </div>
-                <div>
-                  <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.4)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "2px" }}>
-                    {label}
-                  </div>
-                  <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.92)", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-                    {text}
-                  </div>
+                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.80)", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
+                  {text}
                 </div>
-              </a>
-            ))}
-          </div>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
     </div>

@@ -11,6 +11,8 @@ interface PhotoPreview {
   id: string;
   dataUrl: string;
   file: File;
+  width: number;
+  height: number;
 }
 
 type Step = "form" | "generating" | "done";
@@ -32,7 +34,7 @@ export default function HomePage() {
     setCategory(val);
   };
 
-  const compressImage = useCallback((file: File): Promise<string> => {
+  const compressImage = useCallback((file: File): Promise<{ dataUrl: string; width: number; height: number }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -50,7 +52,7 @@ export default function HomePage() {
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
+        resolve({ dataUrl: canvas.toDataURL("image/jpeg", 0.85), width, height });
       };
       img.onerror = reject;
       img.src = url;
@@ -64,8 +66,8 @@ export default function HomePage() {
       for (const file of Array.from(files)) {
         if (!file.type.startsWith("image/")) continue;
         try {
-          const dataUrl = await compressImage(file);
-          newPhotos.push({ id: crypto.randomUUID(), dataUrl, file });
+          const { dataUrl, width, height } = await compressImage(file);
+          newPhotos.push({ id: crypto.randomUUID(), dataUrl, file, width, height });
         } catch {
           // skip unreadable files
         }
@@ -222,11 +224,22 @@ export default function HomePage() {
     setCategory("");
   };
 
-  // Build page data
-  const photoDataUris = photos.map((p) => p.dataUrl);
-  const pairs: [string, string | undefined][] = [];
-  for (let i = 0; i < photoDataUris.length; i += 2) {
-    pairs.push([photoDataUris[i], photoDataUris[i + 1]]);
+  // Adaptive photo grouping: two landscape → pair, otherwise single
+  const isLandscape = (p: PhotoPreview) => p.width > p.height * 1.05;
+  const photoGroups: Array<{ top: PhotoPreview; bottom?: PhotoPreview }> = [];
+  {
+    let i = 0;
+    while (i < photos.length) {
+      const curr = photos[i];
+      const next = photos[i + 1];
+      if (next && isLandscape(curr) && isLandscape(next)) {
+        photoGroups.push({ top: curr, bottom: next });
+        i += 2;
+      } else {
+        photoGroups.push({ top: curr });
+        i += 1;
+      }
+    }
   }
   const coverPhoto = CATEGORY_PHOTO[category] ?? "/lifestyle.svg";
 
@@ -250,13 +263,12 @@ export default function HomePage() {
               category={category}
               productCode={productCode}
               productType={productType}
-              lifestylePhotoSrc={coverPhoto}
             />
           </div>
 
-          {pairs.map(([top, bottom], idx) => (
+          {photoGroups.map(({ top, bottom }, idx) => (
             <div key={idx} className="pdf-page" style={{ width: 794, height: 1123, overflow: "hidden" }}>
-              <PhotoPage topPhoto={top} bottomPhoto={bottom} pageNumber={idx + 2} />
+              <PhotoPage topPhoto={top.dataUrl} bottomPhoto={bottom?.dataUrl} pageNumber={idx + 2} />
             </div>
           ))}
 
