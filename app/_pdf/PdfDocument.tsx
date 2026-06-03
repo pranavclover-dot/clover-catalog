@@ -56,7 +56,7 @@ export default function PdfDocument({
           category={category}
           productCode={productCode}
           productType=""
-          lifestylePhotoSrc={lifestylePhotoUri}
+         
         />
       </PageWrapper>
 
@@ -73,7 +73,7 @@ export default function PdfDocument({
 
       {/* Contact */}
       <PageWrapper>
-        <ContactPage lifestylePhotoSrc={lifestylePhotoUri} />
+        <ContactPage />
       </PageWrapper>
     </div>
   );

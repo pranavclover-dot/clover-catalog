@@ -12,7 +12,7 @@
 import { BRAND } from "@/lib/brand";
 
 interface ContactPageProps {
-  lifestylePhotoSrc: string;
+  lifestylePhotoSrc?: string;
 }
 
 interface ContactRowProps {
@@ -87,7 +87,7 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
   );
 }
 
-export default function ContactPage({ lifestylePhotoSrc }: ContactPageProps) {
+export default function ContactPage({ lifestylePhotoSrc = "/lifestyle.jpg" }: ContactPageProps) {
   return (
     <div
       style={{

@@ -34,7 +34,7 @@ export default function PreviewPage() {
           category="Bedsheets"
           productCode="BS 1 EECO"
           productType=""
-          lifestylePhotoSrc={LIFESTYLE_PH}
+         
         />
       </div>
 
@@ -45,7 +45,7 @@ export default function PreviewPage() {
 
       {/* Contact */}
       <div style={{ boxShadow: "0 4px 24px rgba(0,0,0,0.4)" }}>
-        <ContactPage lifestylePhotoSrc={LIFESTYLE_PH} />
+        <ContactPage />
       </div>
     </div>
   );
