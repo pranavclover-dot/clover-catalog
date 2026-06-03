@@ -66,15 +66,14 @@ export default function Cover({ category, productCode, productType }: CoverProps
           );
         })}
 
-        {/* Bottom dark gradient for text legibility */}
+        {/* Full-page dark overlay so centred text is always legible */}
         <defs>
-          <linearGradient id="fadeGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#020e02" stopOpacity="0" />
-            <stop offset="50%"  stopColor="#020e02" stopOpacity="0.65" />
-            <stop offset="100%" stopColor="#020e02" stopOpacity="0.92" />
-          </linearGradient>
+          <radialGradient id="centerGrad" cx="50%" cy="50%" r="60%">
+            <stop offset="0%"   stopColor="#020e02" stopOpacity="0.55" />
+            <stop offset="100%" stopColor="#020e02" stopOpacity="0.15" />
+          </radialGradient>
         </defs>
-        <rect x="0" y="680" width="794" height="443" fill="url(#fadeGrad)" />
+        <rect x="0" y="0" width="794" height="1123" fill="url(#centerGrad)" />
       </svg>
 
       {/* ── GREEN HEADER BAR ── */}
@@ -105,45 +104,52 @@ export default function Cover({ category, productCode, productType }: CoverProps
         zIndex: 10,
       }} />
 
-      {/* ── BOTTOM TEXT BLOCK ── */}
+      {/* ── CENTRED TEXT BLOCK ── */}
       <div style={{
         position: "absolute",
-        bottom: "88px",
-        left: "52px",
-        right: "52px",
+        top: "71px",            /* below header + accent bar */
+        bottom: "72px",         /* above contact strip */
+        left: 0,
+        right: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+        padding: "0 52px",
         zIndex: 10,
       }}>
-        {/* Category — secondary */}
+        {/* Category — bigger, prominent */}
         <div style={{
-          fontSize: "12px",
-          color: "rgba(255,255,255,0.60)",
-          letterSpacing: "0.30em",
+          fontSize: "26px",
+          color: "rgba(255,255,255,0.80)",
+          letterSpacing: "0.22em",
           textTransform: "uppercase",
           fontWeight: 700,
-          marginBottom: "10px",
+          marginBottom: "20px",
         }}>
           {category}
         </div>
 
-        {/* Accent line */}
+        {/* Accent line — centred */}
         <div style={{
-          width: "44px",
+          width: "52px",
           height: "3px",
           backgroundColor: "#2ecc71",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
-          marginBottom: "12px",
+          marginBottom: "20px",
         }} />
 
         {/* PRODUCT CODE — HERO */}
         <div style={{
-          fontSize: "78px",
+          fontSize: "82px",
           fontWeight: 900,
           color: "#ffffff",
           letterSpacing: "-0.02em",
           lineHeight: 0.9,
           textTransform: "uppercase",
-          marginBottom: "14px",
+          marginBottom: "18px",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
         }}>
@@ -153,10 +159,10 @@ export default function Cover({ category, productCode, productType }: CoverProps
         {/* Product type */}
         {productType && (
           <div style={{
-            fontSize: "15px",
+            fontSize: "16px",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.48)",
-            letterSpacing: "0.13em",
+            color: "rgba(255,255,255,0.50)",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
           }}>
             {productType}
