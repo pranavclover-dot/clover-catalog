@@ -108,7 +108,7 @@ export default function Cover({ category, productCode, productType }: CoverProps
       <div style={{
         position: "absolute",
         top: "71px",            /* below header + accent bar */
-        bottom: "72px",         /* above contact strip */
+        bottom: "110px",        /* above contact strip */
         left: 0,
         right: 0,
         display: "flex",
@@ -183,12 +183,12 @@ export default function Cover({ category, productCode, productType }: CoverProps
       <div style={{
         position: "absolute",
         bottom: 0, left: 0, right: 0,
-        height: "72px",
-        borderTop: "1px solid rgba(255,255,255,0.10)",
+        height: "110px",
+        borderTop: "1px solid rgba(255,255,255,0.12)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 52px",
+        justifyContent: "space-around",
+        padding: "0 40px",
         zIndex: 10,
       }}>
         {([
@@ -196,23 +196,23 @@ export default function Cover({ category, productCode, productType }: CoverProps
           { label: "Phone",   text: BRAND.phone,   href: `tel:${BRAND.phone.replace(/\s/g,"")}`, d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .09 1.18 2 2 0 0 1 2 .05h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" },
           { label: "Email",   text: BRAND.email,   href: `mailto:${BRAND.email}`, d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6" },
         ] as { label: string; text: string; href: string; d: string }[]).map(({ label, text, href, d }) => (
-          <a key={label} href={href} style={{ display: "flex", alignItems: "center", gap: "9px", textDecoration: "none" }}>
+          <a key={label} href={href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", textDecoration: "none" }}>
             <div style={{
-              width: "30px", height: "30px", borderRadius: "50%",
+              width: "44px", height: "44px", borderRadius: "50%",
               backgroundColor: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.22)",
+              border: "1px solid rgba(255,255,255,0.25)",
               WebkitPrintColorAdjust: "exact",
               printColorAdjust: "exact",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" style={{ width: "13px", height: "13px" }}>
+                strokeLinecap="round" strokeLinejoin="round" style={{ width: "20px", height: "20px" }}>
                 <path d={d} />
               </svg>
             </div>
-            <div>
-              <div style={{ fontSize: "7px", color: "rgba(255,255,255,0.32)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "1px" }}>{label}</div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", fontWeight: 600, whiteSpace: "nowrap" }}>{text}</div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.38)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "3px" }}>{label}</div>
+              <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)", fontWeight: 600, whiteSpace: "nowrap" }}>{text}</div>
             </div>
           </a>
         ))}
