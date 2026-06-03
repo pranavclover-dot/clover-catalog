@@ -119,6 +119,14 @@ export default function Cover({ category, productCode, productType }: CoverProps
         padding: "0 52px",
         zIndex: 10,
       }}>
+        {/* Logo in body */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/clover-logo.png"
+          alt="Clover"
+          style={{ height: "72px", width: "auto", objectFit: "contain", marginBottom: "32px", opacity: 0.92 }}
+        />
+
         {/* Category — bigger, prominent */}
         <div style={{
           fontSize: "26px",
@@ -159,11 +167,12 @@ export default function Cover({ category, productCode, productType }: CoverProps
         {/* Product type */}
         {productType && (
           <div style={{
-            fontSize: "16px",
-            fontWeight: 500,
-            color: "rgba(255,255,255,0.50)",
+            fontSize: "22px",
+            fontWeight: 600,
+            color: "rgba(255,255,255,0.60)",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
+            marginTop: "4px",
           }}>
             {productType}
           </div>
