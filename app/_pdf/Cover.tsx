@@ -1,6 +1,6 @@
 /**
  * Cover page — A4 portrait (794×1123px at 96dpi)
- * No lifestyle photo — typographic / brand-led design.
+ * Product code is the hero. Category is a secondary tag.
  */
 import { BRAND } from "@/lib/brand";
 
@@ -26,41 +26,11 @@ export default function Cover({ category, productCode, productType }: CoverProps
         flexDirection: "column",
       }}
     >
-
-      {/* ── Decorative background rings ── */}
-      <div style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "700px",
-        height: "700px",
-        borderRadius: "50%",
-        border: "1px solid rgba(46,204,113,0.07)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "520px",
-        height: "520px",
-        borderRadius: "50%",
-        border: "1px solid rgba(46,204,113,0.10)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "340px",
-        height: "340px",
-        borderRadius: "50%",
-        border: "1px solid rgba(46,204,113,0.13)",
-        pointerEvents: "none",
-      }} />
+      {/* ── Ghost watermark logo — bottom-right ── */}
+      <div style={{ position: "absolute", bottom: "100px", right: "-60px", opacity: 0.04, pointerEvents: "none" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/clover-logo.png" alt="" style={{ height: "420px", width: "auto" }} />
+      </div>
 
       {/* ── TOP GREEN HEADER ── */}
       <div style={{
@@ -80,69 +50,68 @@ export default function Cover({ category, productCode, productType }: CoverProps
       {/* Accent rule */}
       <div style={{ height: "3px", backgroundColor: "#2ecc71", WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", flexShrink: 0 }} />
 
-      {/* ── CENTER CONTENT ── */}
+      {/* ── CENTRE CONTENT ── */}
       <div style={{
         flex: 1,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "0 60px",
+        padding: "40px 60px",
         textAlign: "center",
       }}>
 
-        {/* Large logo */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/clover-logo.png"
-          alt="Clover"
-          style={{ height: "120px", width: "auto", objectFit: "contain", opacity: 0.18, marginBottom: "48px" }}
-        />
-
-        {/* Category — very large */}
+        {/* Category tag — secondary */}
         <div style={{
-          fontSize: "96px",
-          fontWeight: 900,
-          color: "#ffffff",
-          letterSpacing: "-0.03em",
-          lineHeight: 0.92,
+          display: "inline-block",
+          backgroundColor: "rgba(46,204,113,0.12)",
+          border: "1px solid rgba(46,204,113,0.35)",
+          color: "#2ecc71",
+          fontSize: "12px",
+          fontWeight: 800,
+          letterSpacing: "0.30em",
+          padding: "9px 28px",
           textTransform: "uppercase",
-          marginBottom: "28px",
+          borderRadius: "4px",
+          marginBottom: "36px",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
         }}>
           {category}
         </div>
 
-        {/* Accent line */}
+        {/* PRODUCT CODE — HERO ── */}
         <div style={{
-          width: "64px",
-          height: "3px",
-          backgroundColor: "#2ecc71",
+          fontSize: "88px",
+          fontWeight: 900,
+          color: "#ffffff",
+          letterSpacing: "-0.03em",
+          lineHeight: 0.88,
+          textTransform: "uppercase",
+          marginBottom: "28px",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
-          marginBottom: "28px",
-        }} />
-
-        {/* Product code */}
-        <div style={{
-          fontSize: "42px",
-          fontWeight: 800,
-          color: "rgba(255,255,255,0.75)",
-          letterSpacing: "-0.01em",
-          textTransform: "uppercase",
-          marginBottom: productType ? "10px" : "0",
         }}>
           {productCode}
         </div>
 
+        {/* Accent line */}
+        <div style={{
+          width: "52px",
+          height: "3px",
+          backgroundColor: "#2ecc71",
+          WebkitPrintColorAdjust: "exact",
+          printColorAdjust: "exact",
+          marginBottom: "22px",
+        }} />
+
         {/* Product type */}
         {productType && (
           <div style={{
-            fontSize: "18px",
+            fontSize: "17px",
             fontWeight: 500,
-            color: "rgba(255,255,255,0.40)",
-            letterSpacing: "0.12em",
+            color: "rgba(255,255,255,0.42)",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
           }}>
             {productType}
@@ -152,11 +121,11 @@ export default function Cover({ category, productCode, productType }: CoverProps
 
       {/* ── BOTTOM CONTACT STRIP ── */}
       <div style={{
-        padding: "0 44px",
-        borderTop: "1px solid rgba(255,255,255,0.10)",
+        padding: "20px 44px 26px",
+        borderTop: "1px solid rgba(255,255,255,0.08)",
         flexShrink: 0,
-        paddingTop: "20px",
-        paddingBottom: "24px",
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
       }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           {([
@@ -183,7 +152,7 @@ export default function Cover({ category, productCode, productType }: CoverProps
               <div style={{
                 width: "34px", height: "34px", borderRadius: "50%",
                 backgroundColor: "rgba(46,204,113,0.15)",
-                border: "1px solid rgba(46,204,113,0.45)",
+                border: "1px solid rgba(46,204,113,0.4)",
                 WebkitPrintColorAdjust: "exact",
                 printColorAdjust: "exact",
                 display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
@@ -194,10 +163,10 @@ export default function Cover({ category, productCode, productType }: CoverProps
                 </svg>
               </div>
               <div>
-                <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.35)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "2px" }}>
+                <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.32)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "2px" }}>
                   {label}
                 </div>
-                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.80)", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.75)", fontWeight: 600, letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
                   {text}
                 </div>
               </div>

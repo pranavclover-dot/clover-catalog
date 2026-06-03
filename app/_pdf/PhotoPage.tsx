@@ -1,16 +1,32 @@
 /**
  * Gallery page — A4 portrait (794×1123px at 96dpi).
- * Adaptive: 1 photo when portrait/alone, 2 photos when both landscape.
+ * Single mode: explicit pixel dimensions to avoid html2canvas objectFit issues.
+ * Dual mode: both photos fit, cropped with objectFit cover.
  */
 
 interface PhotoPageProps {
   topPhoto: string;
-  bottomPhoto?: string;   // if undefined → single-photo mode
+  topWidth?: number;
+  topHeight?: number;
+  bottomPhoto?: string;
   pageNumber?: number;
 }
 
-export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPageProps) {
+// Available area for single-photo mode
+const AVAIL_W = 738; // 794 - 28px margin each side
+const AVAIL_H = 1008; // 1123 - 64 header - 3 accent - 24 pad top - 24 pad bottom
+
+export default function PhotoPage({ topPhoto, topWidth, topHeight, bottomPhoto, pageNumber }: PhotoPageProps) {
   const isSingle = !bottomPhoto;
+
+  // Compute explicit pixel dimensions for single photo (prevents html2canvas stretch)
+  let displayW = AVAIL_W;
+  let displayH = AVAIL_H;
+  if (isSingle && topWidth && topHeight) {
+    const scale = Math.min(AVAIL_W / topWidth, AVAIL_H / topHeight);
+    displayW = Math.round(topWidth * scale);
+    displayH = Math.round(topHeight * scale);
+  }
 
   return (
     <div
@@ -46,12 +62,9 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
             PRODUCT GALLERY
           </div>
         </div>
-
         {pageNumber !== undefined && (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
-            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700 }}>
-              PAGE
-            </div>
+            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700 }}>PAGE</div>
             <div style={{ color: "white", fontSize: "22px", fontWeight: 900, letterSpacing: "-0.02em", lineHeight: 1 }}>
               {String(pageNumber).padStart(2, "0")}
             </div>
@@ -69,34 +82,30 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          padding: isSingle ? "24px 28px" : "20px 0",
+          padding: "24px 28px",
         }}
       >
         {isSingle ? (
 
-          /* ── SINGLE PHOTO — full height, contains the whole image ── */
-          <div
-            style={{
-              flex: 1,
-              borderRadius: "14px",
-              overflow: "hidden",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-              backgroundColor: "#f4f4f4",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          /* ── SINGLE PHOTO — explicit pixel dimensions, centered ── */
+          <div style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f5f5f5",
+            borderRadius: "14px",
+            overflow: "hidden",
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={topPhoto}
               alt="Product photo"
               style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
+                width: `${displayW}px`,
+                height: `${displayH}px`,
                 display: "block",
               }}
             />
@@ -106,47 +115,33 @@ export default function PhotoPage({ topPhoto, bottomPhoto, pageNumber }: PhotoPa
 
           /* ── TWO PHOTOS — stacked with separator ── */
           <>
-            {/* Top photo */}
             <div style={{
-              marginLeft: "28px",
-              marginRight: "28px",
               flex: 1,
               borderRadius: "14px",
               overflow: "hidden",
               flexShrink: 0,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={topPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
             </div>
 
             {/* Separator */}
-            <div
-              style={{
-                height: "44px",
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                padding: "0 44px",
-              }}
-            >
+            <div style={{ height: "44px", flexShrink: 0, display: "flex", alignItems: "center", padding: "0 16px" }}>
               <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
-              <div style={{ padding: "0 14px", display: "flex", alignItems: "center" }}>
+              <div style={{ padding: "0 14px" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", objectFit: "contain", display: "block" }} />
               </div>
               <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
             </div>
 
-            {/* Bottom photo */}
             <div style={{
-              marginLeft: "28px",
-              marginRight: "28px",
               flex: 1,
               borderRadius: "14px",
               overflow: "hidden",
               flexShrink: 0,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={bottomPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />

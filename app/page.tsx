@@ -224,18 +224,22 @@ export default function HomePage() {
     setCategory("");
   };
 
-  // Adaptive photo grouping: two landscape → pair, otherwise single
-  const isLandscape = (p: PhotoPreview) => p.width > p.height * 1.05;
+  // Adaptive photo grouping: large files (>500KB) get their own page, smaller ones pair up
+  const LARGE_FILE = 500 * 1024; // 500 KB
   const photoGroups: Array<{ top: PhotoPreview; bottom?: PhotoPreview }> = [];
   {
     let i = 0;
     while (i < photos.length) {
       const curr = photos[i];
       const next = photos[i + 1];
-      if (next && isLandscape(curr) && isLandscape(next)) {
+      const currLarge = curr.file.size > LARGE_FILE;
+      const nextLarge = next && next.file.size > LARGE_FILE;
+      if (!currLarge && next && !nextLarge) {
+        // Both small → pair on one page
         photoGroups.push({ top: curr, bottom: next });
         i += 2;
       } else {
+        // Large file or no partner → solo page
         photoGroups.push({ top: curr });
         i += 1;
       }
@@ -268,7 +272,13 @@ export default function HomePage() {
 
           {photoGroups.map(({ top, bottom }, idx) => (
             <div key={idx} className="pdf-page" style={{ width: 794, height: 1123, overflow: "hidden" }}>
-              <PhotoPage topPhoto={top.dataUrl} bottomPhoto={bottom?.dataUrl} pageNumber={idx + 2} />
+              <PhotoPage
+                topPhoto={top.dataUrl}
+                topWidth={top.width}
+                topHeight={top.height}
+                bottomPhoto={bottom?.dataUrl}
+                pageNumber={idx + 2}
+              />
             </div>
           ))}
 
