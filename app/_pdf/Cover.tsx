@@ -108,7 +108,7 @@ export default function Cover({ category, productCode, productType }: CoverProps
       <div style={{
         position: "absolute",
         top: "71px",            /* below header + accent bar */
-        bottom: "110px",        /* above contact strip */
+        bottom: "140px",        /* above contact strip */
         left: 0,
         right: 0,
         display: "flex",
@@ -119,12 +119,12 @@ export default function Cover({ category, productCode, productType }: CoverProps
         padding: "0 52px",
         zIndex: 10,
       }}>
-        {/* Logo in body */}
+        {/* Full white logo in body */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/clover-logo.png"
+          src="/clover-logo-white.png"
           alt="Clover"
-          style={{ height: "72px", width: "auto", objectFit: "contain", marginBottom: "32px", opacity: 0.92 }}
+          style={{ height: "80px", width: "auto", objectFit: "contain", marginBottom: "32px" }}
         />
 
         {/* Category — bigger, prominent */}
@@ -173,18 +173,32 @@ export default function Cover({ category, productCode, productType }: CoverProps
             letterSpacing: "0.14em",
             textTransform: "uppercase",
             marginTop: "4px",
+            marginBottom: "20px",
           }}>
             {productType}
           </div>
         )}
+
+        {/* Address */}
+        <div style={{
+          fontSize: "14px",
+          color: "rgba(255,255,255,0.45)",
+          letterSpacing: "0.04em",
+          lineHeight: 1.6,
+          textAlign: "center",
+          marginTop: productType ? "0" : "20px",
+        }}>
+          {BRAND.address.line1} {BRAND.address.line2}, {BRAND.address.line3}
+        </div>
       </div>
 
       {/* ── CONTACT STRIP ── */}
       <div style={{
         position: "absolute",
-        bottom: 0, left: 0, right: 0,
-        height: "110px",
+        bottom: "20px", left: "20px", right: "20px",
+        height: "100px",
         borderTop: "1px solid rgba(255,255,255,0.12)",
+        borderRadius: "0 0 12px 12px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-around",
