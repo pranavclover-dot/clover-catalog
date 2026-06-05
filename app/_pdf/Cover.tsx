@@ -1,7 +1,8 @@
 /**
  * Cover page — A4 portrait (794×1123px at 96dpi)
- * Diagonal wave design using inline SVG (renders in html2canvas).
- * Product code = hero. Category = secondary tag.
+ * Background: cover-page.jpg (furniture icon pattern with green accents)
+ * Text sequence: logo → category → product code → product type → contact details
+ * Dark text colors for readability on the light patterned background.
  */
 import { BRAND } from "@/lib/brand";
 
@@ -10,23 +11,6 @@ interface CoverProps {
   productCode: string;
   productType: string;
 }
-
-// Diagonal offset across 794px width at ~15°
-// Each layer stacks from bottom with a darker green
-const STRIPE_COLORS = [
-  "#c0e050", // lightest — background fill
-  "#9ecf38",
-  "#7dba28",
-  "#5a9e18",
-  "#38800a",
-  "#1c6004",
-  "#0a4402", // darkest
-];
-
-// Right-side y is 213px above left-side y (creates consistent ~15° diagonal)
-const D = 213;
-// Left-edge y positions where each new stripe begins
-const LEFT_Y = [0, 190, 380, 570, 760, 950, 1060];
 
 export default function Cover({ category, productCode, productType }: CoverProps) {
   return (
@@ -39,197 +23,120 @@ export default function Cover({ category, productCode, productType }: CoverProps
         overflow: "hidden",
         WebkitPrintColorAdjust: "exact",
         printColorAdjust: "exact",
+        backgroundColor: "#f5f5f0",
       }}
     >
+      {/* ── FULL-BLEED BACKGROUND IMAGE ── */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/cover-page.jpg"
+        alt=""
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "794px",
+          height: "1123px",
+          display: "block",
+        }}
+      />
 
-      {/* ── SVG WAVE BACKGROUND ── */}
-      <svg
-        width="794"
-        height="1123"
-        viewBox="0 0 794 1123"
-        style={{ position: "absolute", inset: 0, display: "block" }}
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Base fill (lightest) */}
-        <rect x="0" y="0" width="794" height="1123" fill={STRIPE_COLORS[0]} />
-
-        {/* Stacked diagonal stripes — each covers from its diagonal line to the bottom */}
-        {STRIPE_COLORS.slice(1).map((color, i) => {
-          const leftY  = LEFT_Y[i + 1];
-          const rightY = Math.max(0, leftY - D);
-          return (
-            <polygon
-              key={i}
-              fill={color}
-              points={`0,${leftY} 794,${rightY} 794,1123 0,1123`}
-            />
-          );
-        })}
-
-        {/* Full-page dark overlay so centred text is always legible */}
-        <defs>
-          <radialGradient id="centerGrad" cx="50%" cy="50%" r="60%">
-            <stop offset="0%"   stopColor="#020e02" stopOpacity="0.55" />
-            <stop offset="100%" stopColor="#020e02" stopOpacity="0.15" />
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="794" height="1123" fill="url(#centerGrad)" />
-      </svg>
-
-      {/* ── GREEN HEADER BAR ── */}
+      {/* ── LOGO — centered in upper half ── */}
       <div style={{
         position: "absolute",
-        top: 0, left: 0, right: 0,
-        height: "68px",
-        backgroundColor: "#0e6b3a",
-        WebkitPrintColorAdjust: "exact",
-        printColorAdjust: "exact",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 10,
-      }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/clover-logo.png" alt="Clover" style={{ height: "46px", width: "auto", objectFit: "contain" }} />
-      </div>
-
-      {/* Accent rule */}
-      <div style={{
-        position: "absolute",
-        top: "68px", left: 0, right: 0,
-        height: "3px",
-        backgroundColor: "#2ecc71",
-        WebkitPrintColorAdjust: "exact",
-        printColorAdjust: "exact",
-        zIndex: 10,
-      }} />
-
-      {/* ── CENTRED TEXT BLOCK ── */}
-      <div style={{
-        position: "absolute",
-        top: "71px",            /* below header + accent bar */
-        bottom: "140px",        /* above contact strip */
+        top: "200px",
         left: 0,
         right: 0,
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
         justifyContent: "center",
-        textAlign: "center",
-        padding: "0 52px",
         zIndex: 10,
       }}>
-        {/* Full white logo in body */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/clover-logo-white.png"
+          src="/clover-logo.png"
           alt="Clover"
-          style={{ height: "80px", width: "auto", objectFit: "contain", marginBottom: "32px" }}
+          style={{ height: "110px", width: "auto", display: "block" }}
         />
+      </div>
 
-        {/* Category — bigger, prominent */}
+      {/* ── TEXT BLOCK — right-aligned, lower center ── */}
+      <div style={{
+        position: "absolute",
+        top: "560px",
+        left: "44px",
+        right: "60px",
+        zIndex: 10,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "flex-end",
+        textAlign: "right",
+      }}>
+
+        {/* Product Category */}
         <div style={{
-          fontSize: "26px",
-          color: "rgba(255,255,255,0.80)",
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
+          fontSize: "22px",
           fontWeight: 700,
-          marginBottom: "20px",
+          color: "#0e6b3a",
+          letterSpacing: "0.18em",
+          textTransform: "uppercase",
+          marginBottom: "14px",
         }}>
           {category}
         </div>
 
-        {/* Accent line — centred */}
+        {/* Accent rule */}
         <div style={{
-          width: "52px",
+          width: "60px",
           height: "3px",
-          backgroundColor: "#2ecc71",
+          backgroundColor: "#0e6b3a",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
-          marginBottom: "20px",
+          marginBottom: "16px",
         }} />
 
-        {/* PRODUCT CODE — HERO */}
+        {/* PRODUCT CODE — hero */}
         <div style={{
-          fontSize: "82px",
+          fontSize: "72px",
           fontWeight: 900,
-          color: "#ffffff",
+          color: "#0a1a0a",
           letterSpacing: "-0.02em",
-          lineHeight: 0.9,
+          lineHeight: 0.95,
           textTransform: "uppercase",
-          marginBottom: "18px",
+          marginBottom: "20px",
           WebkitPrintColorAdjust: "exact",
           printColorAdjust: "exact",
         }}>
           {productCode}
         </div>
 
-        {/* Product type */}
+        {/* Product Type (e.g. 100% Cotton) */}
         {productType && (
           <div style={{
-            fontSize: "22px",
+            fontSize: "18px",
             fontWeight: 600,
-            color: "rgba(255,255,255,0.60)",
-            letterSpacing: "0.14em",
+            color: "#2a4a2a",
+            letterSpacing: "0.12em",
             textTransform: "uppercase",
-            marginTop: "4px",
-            marginBottom: "20px",
+            marginBottom: "24px",
           }}>
             {productType}
           </div>
         )}
 
-        {/* Address */}
+        {/* Contact details */}
         <div style={{
-          fontSize: "14px",
-          color: "rgba(255,255,255,0.45)",
-          letterSpacing: "0.04em",
-          lineHeight: 1.6,
-          textAlign: "center",
-          marginTop: productType ? "0" : "20px",
+          fontSize: "13px",
+          color: "#3a4a3a",
+          letterSpacing: "0.03em",
+          lineHeight: 1.9,
+          textAlign: "right",
         }}>
-          {BRAND.address.line1} {BRAND.address.line2}, {BRAND.address.line3}
+          <div style={{ fontWeight: 700, color: "#0e6b3a", marginBottom: "2px" }}>{BRAND.companyName}</div>
+          <div>{BRAND.address.line1}</div>
+          <div>{BRAND.address.line2}, {BRAND.address.line3}</div>
+          <div style={{ marginTop: "6px" }}>{BRAND.phone}</div>
+          <div>{BRAND.email}</div>
+          <div>{BRAND.website}</div>
         </div>
-      </div>
-
-      {/* ── CONTACT STRIP ── */}
-      <div style={{
-        position: "absolute",
-        bottom: "20px", left: "20px", right: "20px",
-        height: "100px",
-        borderTop: "1px solid rgba(255,255,255,0.12)",
-        borderRadius: "0 0 12px 12px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-around",
-        padding: "0 40px",
-        zIndex: 10,
-      }}>
-        {([
-          { label: "Website", text: BRAND.website, href: `https://${BRAND.website}`, d: "M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" },
-          { label: "Phone",   text: BRAND.phone,   href: `tel:${BRAND.phone.replace(/\s/g,"")}`, d: "M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .09 1.18 2 2 0 0 1 2 .05h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" },
-          { label: "Email",   text: BRAND.email,   href: `mailto:${BRAND.email}`, d: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6" },
-        ] as { label: string; text: string; href: string; d: string }[]).map(({ label, text, href, d }) => (
-          <a key={label} href={href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px", textDecoration: "none" }}>
-            <div style={{
-              width: "44px", height: "44px", borderRadius: "50%",
-              backgroundColor: "rgba(255,255,255,0.12)",
-              border: "1px solid rgba(255,255,255,0.25)",
-              WebkitPrintColorAdjust: "exact",
-              printColorAdjust: "exact",
-              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"
-                strokeLinecap="round" strokeLinejoin="round" style={{ width: "20px", height: "20px" }}>
-                <path d={d} />
-              </svg>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.38)", letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 700, marginBottom: "3px" }}>{label}</div>
-              <div style={{ fontSize: "15px", color: "rgba(255,255,255,0.85)", fontWeight: 600, whiteSpace: "nowrap" }}>{text}</div>
-            </div>
-          </a>
-        ))}
       </div>
     </div>
   );
