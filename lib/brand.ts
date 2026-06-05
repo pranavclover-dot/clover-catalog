@@ -7,7 +7,7 @@ export const BRAND = {
     line2: "Phase-2, Noida, Uttar",
     line3: "Pradesh 201304",
   },
-  phone: "+91 9220709424",
+  phone: "+91 95600 80424",
   email: "contact@theclover.in",
   website: "www.theclover.in",
   primaryColor: "#0e6b3a",
