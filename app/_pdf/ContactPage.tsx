@@ -87,7 +87,7 @@ function ContactRow({ label, value, href, icon }: ContactRowProps) {
   );
 }
 
-export default function ContactPage({ lifestylePhotoSrc = "/lifestyle.jpg" }: ContactPageProps) {
+export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png" }: ContactPageProps) {
   return (
     <div
       style={{
