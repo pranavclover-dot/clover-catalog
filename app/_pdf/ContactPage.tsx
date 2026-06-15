@@ -190,6 +190,7 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
           style={{
             width: "794px",
             display: "block",
+            marginTop: "-420px",
           }}
         />
         {/* Gradient overlay at top for smooth transition */}
