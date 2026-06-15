@@ -196,9 +196,10 @@ export default function HomePage() {
       const filename = `${safeCode}__${safeType}__${Date.now()}.pdf`;
       const file = new File([blobData], filename, { type: "application/pdf" });
 
+      const safeCategory = category.trim().replace(/\s+/g, "_");
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("path", `catalogs/${category}/${filename}`);
+      formData.append("path", `catalogs/${safeCategory}/${filename}`);
 
       const res = await fetch("/api/catalog/upload", { method: "POST", body: formData });
       const data = await res.json();
@@ -213,7 +214,7 @@ export default function HomePage() {
         const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
         const thumbForm = new FormData();
         thumbForm.append("file", thumbFile);
-        thumbForm.append("path", `catalogs/${category}/${thumbBase}.thumb.jpg`);
+        thumbForm.append("path", `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`);
         await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
       }
 

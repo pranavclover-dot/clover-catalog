@@ -20,7 +20,7 @@ export async function GET() {
       .map((b) => {
         // pathname: "catalogs/{category}/{CODE}__{TYPE}__{ts}.pdf"
         const parts = b.pathname.split("/");
-        const category = parts[1] ?? "";
+        const category = (parts[1] ?? "").replace(/_/g, " ");
         const filename = (parts[2] ?? "").replace(/\.pdf$/i, "");
         const segs = filename.split("__");
         const product_code = (segs[0] ?? "").replace(/_/g, " ");
