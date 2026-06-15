@@ -190,12 +190,10 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
           alt=""
           style={{
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
+            top: "-521px",
+            left: "0",
             width: "794px",
-            height: "380px",
-            objectFit: "cover",
+            height: "1422px",
             display: "block",
           }}
         />
