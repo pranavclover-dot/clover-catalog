@@ -38,7 +38,7 @@ export default function AdminPage() {
       const r = await fetch("/api/catalog/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: entry.file_url, key }),
+        body: JSON.stringify({ url: entry.file_url, key: key.trim() }),
       });
       if (!r.ok) {
         const d = await r.json();

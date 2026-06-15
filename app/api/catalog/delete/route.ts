@@ -6,7 +6,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY ?? "clover2024";
 export async function DELETE(req: NextRequest) {
   const { url, key } = await req.json();
 
-  if (key !== ADMIN_KEY) {
+  if ((key ?? "").trim() !== ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
