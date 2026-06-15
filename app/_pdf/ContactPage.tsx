@@ -175,11 +175,10 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
         />
       </div>
 
-      {/* ══ LIFESTYLE PHOTO — fixed height, img tag for html2canvas compatibility ══ */}
+      {/* ══ LIFESTYLE PHOTO — fills all remaining space, clips tall image from bottom ══ */}
       <div style={{
-        height: "380px",
+        flex: 1,
         marginTop: "20px",
-        position: "relative",
         overflow: "hidden",
         WebkitPrintColorAdjust: "exact",
         printColorAdjust: "exact",
@@ -189,11 +188,7 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
           src={lifestylePhotoSrc}
           alt=""
           style={{
-            position: "absolute",
-            top: "-521px",
-            left: "0",
             width: "794px",
-            height: "1422px",
             display: "block",
           }}
         />

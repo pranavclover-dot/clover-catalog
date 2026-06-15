@@ -5,6 +5,16 @@ export async function GET() {
   try {
     const { blobs } = await list({ prefix: "catalogs/" });
 
+    // Build a map of thumbnail URLs keyed by their base filename
+    const thumbMap = new Map<string, string>();
+    blobs
+      .filter((b) => b.pathname.endsWith(".thumb.jpg"))
+      .forEach((b) => {
+        const parts = b.pathname.split("/");
+        const base = (parts[2] ?? "").replace(/\.thumb\.jpg$/, "");
+        thumbMap.set(base, b.url);
+      });
+
     const entries = blobs
       .filter((b) => b.pathname.endsWith(".pdf"))
       .map((b) => {
@@ -21,6 +31,7 @@ export async function GET() {
           product_code,
           product_type,
           file_url: b.url,
+          thumbnail_url: thumbMap.get(filename) ?? null,
           createdAt: b.uploadedAt instanceof Date
             ? b.uploadedAt.toISOString()
             : String(b.uploadedAt),

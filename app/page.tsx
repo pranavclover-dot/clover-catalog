@@ -205,6 +205,18 @@ export default function HomePage() {
 
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
 
+      // Upload first photo as thumbnail
+      if (photos.length > 0) {
+        const thumbBase = filename.replace(/\.pdf$/, "");
+        const thumbRes = await fetch(photos[0].dataUrl);
+        const thumbBlob = await thumbRes.blob();
+        const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
+        const thumbForm = new FormData();
+        thumbForm.append("file", thumbFile);
+        thumbForm.append("path", `catalogs/${category}/${thumbBase}.thumb.jpg`);
+        await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
+      }
+
       setUploadDone(true);
     } catch (err) {
       alert("Upload failed: " + (err instanceof Error ? err.message : "Unknown error"));

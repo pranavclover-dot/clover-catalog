@@ -9,6 +9,7 @@ interface Entry {
   product_code: string;
   product_type: string;
   file_url: string;
+  thumbnail_url: string | null;
   createdAt: string;
 }
 
@@ -178,15 +179,24 @@ export default function CatalogPage() {
                     (e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 12px rgba(0,0,0,0.07)";
                   }}
                 >
-                  {/* PDF icon area */}
-                  <div style={{ backgroundColor: "#f0f7f3", height: "120px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
-                      <rect x="4" y="2" width="12" height="16" rx="2" fill="#0e6b3a" opacity="0.15" />
-                      <rect x="4" y="2" width="12" height="16" rx="2" stroke="#0e6b3a" strokeWidth="1.5" />
-                      <path d="M8 6h6M8 9h6M8 12h4" stroke="#0e6b3a" strokeWidth="1.5" strokeLinecap="round" />
-                      <path d="M14 2l4 4h-4V2z" fill="#0e6b3a" opacity="0.5" />
-                      <path d="M14 2v4h4" stroke="#0e6b3a" strokeWidth="1.5" strokeLinejoin="round" />
-                    </svg>
+                  {/* Thumbnail or PDF icon */}
+                  <div style={{ backgroundColor: "#f0f7f3", height: "160px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {entry.thumbnail_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={entry.thumbnail_url}
+                        alt={entry.product_code}
+                        style={{ width: "100%", height: "160px", objectFit: "cover", display: "block" }}
+                      />
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
+                        <rect x="4" y="2" width="12" height="16" rx="2" fill="#0e6b3a" opacity="0.15" />
+                        <rect x="4" y="2" width="12" height="16" rx="2" stroke="#0e6b3a" strokeWidth="1.5" />
+                        <path d="M8 6h6M8 9h6M8 12h4" stroke="#0e6b3a" strokeWidth="1.5" strokeLinecap="round" />
+                        <path d="M14 2l4 4h-4V2z" fill="#0e6b3a" opacity="0.5" />
+                        <path d="M14 2v4h4" stroke="#0e6b3a" strokeWidth="1.5" strokeLinejoin="round" />
+                      </svg>
+                    )}
                   </div>
 
                   {/* Info */}
