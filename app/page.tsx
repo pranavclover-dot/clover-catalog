@@ -191,12 +191,13 @@ export default function HomePage() {
       const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
       // Encode metadata in filename: CODE__TYPE__TIMESTAMP.pdf
-      const safeCode = productCode.trim().replace(/\s+/g, "_");
-      const safeType = (productType.trim() || "-").replace(/\s+/g, "_");
+      // Strip any char that isn't alphanumeric, hyphen, or space, then replace spaces with _
+      const sanitize = (s: string) => s.trim().replace(/[^a-zA-Z0-9\s\-]/g, "").replace(/\s+/g, "_").replace(/^_+|_+$/g, "") || "x";
+      const safeCode = sanitize(productCode);
+      const safeType = productType.trim() ? sanitize(productType) : "-";
+      const safeCategory = sanitize(category);
       const filename = `${safeCode}__${safeType}__${Date.now()}.pdf`;
       const file = new File([blobData], filename, { type: "application/pdf" });
-
-      const safeCategory = category.trim().replace(/\s+/g, "_");
       const formData = new FormData();
       formData.append("file", file);
       formData.append("path", `catalogs/${safeCategory}/${filename}`);
