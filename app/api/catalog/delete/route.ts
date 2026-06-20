@@ -14,6 +14,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "No URL provided" }, { status: 400 });
   }
 
-  await del(url);
+  const thumbUrl = url.replace(/\.pdf$/i, ".thumb.jpg");
+  await Promise.all([del(url), del(thumbUrl).catch(() => {})]);
   return NextResponse.json({ success: true });
 }

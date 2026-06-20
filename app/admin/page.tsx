@@ -21,7 +21,7 @@ export default function AdminPage() {
 
   const load = async () => {
     setLoading(true);
-    const r = await fetch("/api/catalog/list");
+    const r = await fetch("/api/catalog/list", { cache: "no-store" });
     const { entries } = await r.json();
     setEntries(entries ?? []);
     setLoading(false);
