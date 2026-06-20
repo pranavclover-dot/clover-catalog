@@ -190,13 +190,20 @@ export default function HomePage() {
     try {
       const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
-      // Encode metadata in filename: CODE__TYPE__TIMESTAMP.pdf
-      // Strip any char that isn't alphanumeric, hyphen, or space, then replace spaces with _
-      const sanitize = (s: string) => s.trim().replace(/[^a-zA-Z0-9\s\-]/g, "").replace(/\s+/g, "_").replace(/^_+|_+$/g, "") || "x";
+      // Vercel Blob only allows [a-zA-Z0-9\-\.] in pathnames — no underscores, no spaces, no %.
+      // Encode metadata in filename as: CODE.TYPE.TIMESTAMP.pdf (dot-separated)
+      const sanitize = (s: string) =>
+        s.trim()
+         .replace(/[^a-zA-Z0-9\s\-]/g, "")  // strip %, &, etc. (keep letters, digits, spaces, hyphens)
+         .trim()
+         .replace(/\s+/g, "-")               // spaces → hyphens
+         .replace(/-+/g, "-")                // collapse consecutive hyphens
+         .replace(/^-|-$/g, "")              // trim edge hyphens
+         || "x";
       const safeCode = sanitize(productCode);
       const safeType = productType.trim() ? sanitize(productType) : "-";
       const safeCategory = sanitize(category);
-      const filename = `${safeCode}__${safeType}__${Date.now()}.pdf`;
+      const filename = `${safeCode}.${safeType}.${Date.now()}.pdf`;
       const file = new File([blobData], filename, { type: "application/pdf" });
       const formData = new FormData();
       formData.append("file", file);

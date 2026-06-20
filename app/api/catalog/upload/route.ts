@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing file or path" }, { status: 400 });
     }
 
-    const blob = await put(path, file, { access: "public" });
+    const blob = await put(path, file, { access: "public", addRandomSuffix: false });
     return NextResponse.json({ url: blob.url });
   } catch (err) {
     console.error("Upload error:", err);
