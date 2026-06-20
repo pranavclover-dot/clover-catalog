@@ -25,7 +25,7 @@ export default function CatalogPage() {
     const cat = params.get("category");
     if (cat) setActiveCategory(cat);
 
-    fetch("/api/catalog/list")
+    fetch("/api/catalog/list", { cache: "no-store" })
       .then((r) => r.json())
       .then(({ entries }) => {
         setEntries(entries ?? []);
