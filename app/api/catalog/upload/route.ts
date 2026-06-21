@@ -13,10 +13,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing file or path" }, { status: 400 });
     }
 
-    const blob = await put(path, file, { access: "public", addRandomSuffix: false });
+    const blob = await put(path, file, { access: "public", addRandomSuffix: false, allowOverwrite: true });
     return NextResponse.json({ url: blob.url });
   } catch (err) {
-    console.error("Upload error:", err);
-    return NextResponse.json({ error: (err as Error).message }, { status: 500 });
+    const msg = (err as Error).message ?? String(err);
+    console.error("Upload error — path:", path, "— error:", msg);
+    return NextResponse.json({ error: msg, path }, { status: 500 });
   }
 }

@@ -212,7 +212,7 @@ export default function HomePage() {
       const res = await fetch("/api/catalog/upload", { method: "POST", body: formData });
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error ?? "Upload failed");
+      if (!res.ok) throw new Error(`${data.error ?? "Upload failed"} [path: ${data.path ?? "unknown"}]`);
 
       // Upload thumbnail — Safari doesn't support fetch() with data: URLs so convert directly
       if (photos.length > 0) {
@@ -272,6 +272,28 @@ export default function HomePage() {
     }
   }
   const coverPhoto = CATEGORY_PHOTO[category] ?? "/lifestyle.svg";
+
+  // Chrome-only guard
+  const isChrome = typeof navigator !== "undefined" && /Chrome\//.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+  if (typeof navigator !== "undefined" && !isChrome) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f8f5f0", fontFamily: "Inter, sans-serif", padding: "24px" }}>
+        <div style={{ background: "white", borderRadius: "16px", padding: "40px 32px", maxWidth: "400px", textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.08)" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/clover-logo-green.png" alt="Clover" style={{ height: "32px", marginBottom: "24px" }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+          <div style={{ fontSize: "32px", marginBottom: "12px" }}>🌐</div>
+          <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#0a0a0a", margin: "0 0 10px" }}>Chrome Required</h2>
+          <p style={{ color: "#666", fontSize: "14px", lineHeight: 1.6, margin: "0 0 20px" }}>
+            This catalog generator is optimised for <strong>Google Chrome</strong>. Please open this page in Chrome for the best experience.
+          </p>
+          <a href="https://www.google.com/chrome/" target="_blank" rel="noopener noreferrer"
+            style={{ display: "inline-block", padding: "10px 24px", backgroundColor: "#0e6b3a", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: 700 }}>
+            Download Chrome
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
