@@ -20,25 +20,31 @@ export async function GET() {
     const entries = blobs
       .filter((b) => b.pathname.endsWith(".pdf"))
       .map((b) => {
-        // pathname: "catalogs/{category}/{CODE}.{TYPE}.{ts}.pdf"  (new dot format)
-        //       or: "catalogs/{category}/{CODE}__{TYPE}__{ts}.pdf" (legacy __ format)
+        // pathname: "catalogs/{category}/{CODE}--{TYPE}--{ts}.pdf"  (current format)
+        //       or: "catalogs/{category}/{CODE}.{TYPE}.{ts}.pdf"    (intermediate format)
+        //       or: "catalogs/{category}/{CODE}__{TYPE}__{ts}.pdf"  (legacy format)
         const parts = b.pathname.split("/");
         const category = (parts[1] ?? "").replace(/-/g, " ");
         const filename = (parts[2] ?? "").replace(/\.pdf$/i, "");
         let product_code: string, product_type: string;
-        if (filename.includes("__")) {
-          // legacy format
+        if (filename.includes("--")) {
+          // current double-hyphen format: CODE--TYPE--TIMESTAMP
+          const segs = filename.split("--");
+          product_code = segs[0] ?? "";
+          product_type = (segs[1] ?? "").replace(/^na$/, "").replace(/-/g, " ");
+        } else if (filename.includes("__")) {
+          // legacy underscore format
           const segs = filename.split("__");
           product_code = (segs[0] ?? "").replace(/_/g, " ");
           product_type = (segs[1] ?? "").replace(/_/g, " ").replace(/^-$/, "");
         } else {
-          // new dot-separated format: CODE.TYPE.TIMESTAMP
+          // intermediate dot format: CODE.TYPE.TIMESTAMP
           const firstDot = filename.indexOf(".");
           const afterCode = firstDot >= 0 ? filename.slice(firstDot + 1) : "";
           product_code = firstDot >= 0 ? filename.slice(0, firstDot) : filename;
           const secondDot = afterCode.indexOf(".");
           const typeRaw = secondDot >= 0 ? afterCode.slice(0, secondDot) : afterCode;
-          product_type = typeRaw.replace(/-/g, " ").replace(/^-$/, "").trim();
+          product_type = typeRaw.replace(/-/g, " ").replace(/^-$/, "").replace(/^na$/, "").trim();
         }
         return {
           id: b.pathname,

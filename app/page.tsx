@@ -190,20 +190,20 @@ export default function HomePage() {
     try {
       const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
-      // Vercel Blob only allows [a-zA-Z0-9\-\.] in pathnames — no underscores, no spaces, no %.
-      // Encode metadata in filename as: CODE.TYPE.TIMESTAMP.pdf (dot-separated)
+      // Vercel Blob only allows [a-zA-Z0-9\-] in pathnames (no underscores, spaces, %, dots in segments).
+      // Filename format: CODE--TYPE--TIMESTAMP.pdf  (double-hyphen separator, single-hyphen in content)
       const sanitize = (s: string) =>
         s.trim()
-         .replace(/[^a-zA-Z0-9\s\-]/g, "")  // strip %, &, etc. (keep letters, digits, spaces, hyphens)
+         .replace(/[^a-zA-Z0-9\s]/g, " ")  // replace %, -, &, etc. with space
          .trim()
-         .replace(/\s+/g, "-")               // spaces → hyphens
-         .replace(/-+/g, "-")                // collapse consecutive hyphens
-         .replace(/^-|-$/g, "")              // trim edge hyphens
+         .replace(/\s+/g, "-")              // spaces → hyphens
+         .replace(/-+/g, "-")               // collapse consecutive hyphens
+         .replace(/^-|-$/g, "")             // trim edge hyphens
          || "x";
       const safeCode = sanitize(productCode);
-      const safeType = productType.trim() ? sanitize(productType) : "-";
+      const safeType = productType.trim() ? sanitize(productType) : "na";
       const safeCategory = sanitize(category);
-      const filename = `${safeCode}.${safeType}.${Date.now()}.pdf`;
+      const filename = `${safeCode}--${safeType}--${Date.now()}.pdf`;
       const file = new File([blobData], filename, { type: "application/pdf" });
       const formData = new FormData();
       formData.append("file", file);
@@ -214,16 +214,21 @@ export default function HomePage() {
 
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
 
-      // Upload first photo as thumbnail
+      // Upload thumbnail — Safari doesn't support fetch() with data: URLs so convert directly
       if (photos.length > 0) {
-        const thumbBase = filename.replace(/\.pdf$/, "");
-        const thumbRes = await fetch(photos[0].dataUrl);
-        const thumbBlob = await thumbRes.blob();
-        const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
-        const thumbForm = new FormData();
-        thumbForm.append("file", thumbFile);
-        thumbForm.append("path", `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`);
-        await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
+        try {
+          const thumbBase = filename.replace(/\.pdf$/, "");
+          const [, b64] = photos[0].dataUrl.split(",");
+          const bytes = Uint8Array.from(atob(b64 ?? ""), (c) => c.charCodeAt(0));
+          const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
+          const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
+          const thumbForm = new FormData();
+          thumbForm.append("file", thumbFile);
+          thumbForm.append("path", `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`);
+          await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
+        } catch {
+          // thumbnail failure is non-fatal — PDF is already saved
+        }
       }
 
       setUploadDone(true);
