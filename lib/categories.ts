@@ -66,4 +66,6 @@ export const CATEGORY_PHOTO: Record<string, string> = {
   "Blankets":         "/Blankets.png",
   "Charity Blankets": "/Donation blanket.png",
   "Hotel Linens":     "/Hotel Linens.png",
+  "Towels":           "/Towels.png",
+  "Stools":           "/Stool.jpeg",
 };
