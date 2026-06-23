@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-    const path = formData.get("path") as string | null;
-
-    if (!file || !path) {
-      return NextResponse.json({ error: "Missing file or path" }, { status: 400 });
-    }
-
-    const blob = await put(path, file, { access: "public", addRandomSuffix: false, allowOverwrite: true });
-    return NextResponse.json({ url: blob.url });
+    const body = (await req.json()) as HandleUploadBody;
+    const jsonResponse = await handleUpload({
+      body,
+      request: req,
+      onBeforeGenerateToken: async () => ({
+        allowedContentTypes: ["application/pdf", "image/jpeg", "image/jpg"],
+        addRandomSuffix: false,
+        allowOverwrite: true,
+      }),
+      onUploadCompleted: async () => {},
+    });
+    return NextResponse.json(jsonResponse);
   } catch (err) {
     const msg = (err as Error).message ?? String(err);
-    console.error("Upload error — path:", path, "— error:", msg);
-    return NextResponse.json({ error: msg, path }, { status: 500 });
+    console.error("Upload error:", msg);
+    return NextResponse.json({ error: msg }, { status: 400 });
   }
 }

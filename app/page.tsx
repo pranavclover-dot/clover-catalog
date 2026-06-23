@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { upload } from "@vercel/blob/client";
 import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PHOTO } from "@/lib/categories";
 import { BRAND } from "@/lib/brand";
 import Cover from "@/app/_pdf/Cover";
@@ -204,17 +205,14 @@ export default function HomePage() {
       const safeType = productType.trim() ? sanitize(productType) : "na";
       const safeCategory = sanitize(category);
       const filename = `${safeCode}--${safeType}--${Date.now()}.pdf`;
+      // Upload PDF directly to Vercel Blob CDN — bypasses the 4.5MB function body limit
       const file = new File([blobData], filename, { type: "application/pdf" });
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("path", `catalogs/${safeCategory}/${filename}`);
+      await upload(`catalogs/${safeCategory}/${filename}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/catalog/upload",
+      });
 
-      const res = await fetch("/api/catalog/upload", { method: "POST", body: formData });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(`${data.error ?? "Upload failed"} [path: ${data.path ?? "unknown"}]`);
-
-      // Upload thumbnail — Safari doesn't support fetch() with data: URLs so convert directly
+      // Upload thumbnail (non-fatal)
       if (photos.length > 0) {
         try {
           const thumbBase = filename.replace(/\.pdf$/, "");
@@ -222,10 +220,10 @@ export default function HomePage() {
           const bytes = Uint8Array.from(atob(b64 ?? ""), (c) => c.charCodeAt(0));
           const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
           const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
-          const thumbForm = new FormData();
-          thumbForm.append("file", thumbFile);
-          thumbForm.append("path", `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`);
-          await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
+          await upload(`catalogs/${safeCategory}/${thumbBase}.thumb.jpg`, thumbFile, {
+            access: "public",
+            handleUploadUrl: "/api/catalog/upload",
+          });
         } catch {
           // thumbnail failure is non-fatal — PDF is already saved
         }
