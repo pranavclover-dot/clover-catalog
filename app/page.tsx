@@ -323,6 +323,8 @@ export default function HomePage() {
                 topWidth={top.width}
                 topHeight={top.height}
                 bottomPhoto={bottom?.dataUrl}
+                bottomWidth={bottom?.width}
+                bottomHeight={bottom?.height}
                 pageNumber={idx + 2}
               />
             </div>

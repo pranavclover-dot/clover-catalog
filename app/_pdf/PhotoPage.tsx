@@ -9,24 +9,32 @@ interface PhotoPageProps {
   topWidth?: number;
   topHeight?: number;
   bottomPhoto?: string;
+  bottomWidth?: number;
+  bottomHeight?: number;
   pageNumber?: number;
 }
 
-// Available area for single-photo mode
-const AVAIL_W = 738; // 794 - 28px margin each side
-const AVAIL_H = 1008; // 1123 - 64 header - 3 accent - 24 pad top - 24 pad bottom
+// Available area (794px page, 28px padding each side, 64px header, 3px accent, 48px padding top+bottom)
+const AVAIL_W = 738;
+const AVAIL_H = 1008;
+// Each dual-photo slot: (AVAIL_H - 44px separator) / 2
+const DUAL_H = Math.floor((AVAIL_H - 44) / 2); // 482px
 
-export default function PhotoPage({ topPhoto, topWidth, topHeight, bottomPhoto, pageNumber }: PhotoPageProps) {
+function fitDimensions(srcW: number | undefined, srcH: number | undefined, boxW: number, boxH: number) {
+  if (!srcW || !srcH) return { w: boxW, h: boxH };
+  const scale = Math.min(boxW / srcW, boxH / srcH);
+  return { w: Math.round(srcW * scale), h: Math.round(srcH * scale) };
+}
+
+export default function PhotoPage({ topPhoto, topWidth, topHeight, bottomPhoto, bottomWidth, bottomHeight, pageNumber }: PhotoPageProps) {
   const isSingle = !bottomPhoto;
 
-  // Compute explicit pixel dimensions for single photo (prevents html2canvas stretch)
-  let displayW = AVAIL_W;
-  let displayH = AVAIL_H;
-  if (isSingle && topWidth && topHeight) {
-    const scale = Math.min(AVAIL_W / topWidth, AVAIL_H / topHeight);
-    displayW = Math.round(topWidth * scale);
-    displayH = Math.round(topHeight * scale);
-  }
+  // Single mode — fit within full available area
+  const single = fitDimensions(topWidth, topHeight, AVAIL_W, AVAIL_H);
+
+  // Dual mode — fit each photo within its slot
+  const dualTop = fitDimensions(topWidth, topHeight, AVAIL_W, DUAL_H);
+  const dualBot = fitDimensions(bottomWidth, bottomHeight, AVAIL_W, DUAL_H);
 
   return (
     <div
@@ -103,27 +111,29 @@ export default function PhotoPage({ topPhoto, topWidth, topHeight, bottomPhoto, 
             <img
               src={topPhoto}
               alt="Product photo"
-              style={{
-                width: `${displayW}px`,
-                height: `${displayH}px`,
-                display: "block",
-              }}
+              style={{ width: `${single.w}px`, height: `${single.h}px`, display: "block" }}
             />
           </div>
 
         ) : (
 
-          /* ── TWO PHOTOS — stacked with separator ── */
+          /* ── TWO PHOTOS — explicit pixel dimensions (no objectFit, html2canvas compat) ── */
           <>
             <div style={{
-              flex: 1,
+              height: `${DUAL_H}px`,
+              flexShrink: 0,
               borderRadius: "14px",
               overflow: "hidden",
-              flexShrink: 0,
+              backgroundColor: "#f5f5f5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
+              WebkitPrintColorAdjust: "exact",
+              printColorAdjust: "exact",
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={topPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <img src={topPhoto} alt="Product photo" style={{ width: `${dualTop.w}px`, height: `${dualTop.h}px`, display: "block" }} />
             </div>
 
             {/* Separator */}
@@ -131,20 +141,26 @@ export default function PhotoPage({ topPhoto, topWidth, topHeight, bottomPhoto, 
               <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
               <div style={{ padding: "0 14px" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", objectFit: "contain", display: "block" }} />
+                <img src="/clover-green.png" alt="" style={{ height: "20px", width: "auto", display: "block" }} />
               </div>
               <div style={{ flex: 1, height: "1px", backgroundColor: "#0e6b3a", opacity: 0.2 }} />
             </div>
 
             <div style={{
-              flex: 1,
+              height: `${DUAL_H}px`,
+              flexShrink: 0,
               borderRadius: "14px",
               overflow: "hidden",
-              flexShrink: 0,
+              backgroundColor: "#f5f5f5",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               boxShadow: "0 8px 32px rgba(0,0,0,0.22)",
+              WebkitPrintColorAdjust: "exact",
+              printColorAdjust: "exact",
             }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bottomPhoto} alt="Product photo" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <img src={bottomPhoto} alt="Product photo" style={{ width: `${dualBot.w}px`, height: `${dualBot.h}px`, display: "block" }} />
             </div>
           </>
         )}
