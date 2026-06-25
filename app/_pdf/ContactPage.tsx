@@ -175,11 +175,19 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
         />
       </div>
 
-      {/* ══ LIFESTYLE PHOTO — fills all remaining space, clips tall image from bottom ══ */}
+      {/* ══ LIFESTYLE PHOTO — fills all remaining space ══
+           html2canvas ignores objectFit, so we scale the image to always fill
+           the container HEIGHT (landscape → overflows width, clipped; portrait →
+           overflows height, clipped). Green background fills any leftover space
+           so it blends seamlessly into the footer. */}
       <div style={{
         flex: 1,
         marginTop: "20px",
         overflow: "hidden",
+        backgroundColor: "#0e6b3a",
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "center",
         WebkitPrintColorAdjust: "exact",
         printColorAdjust: "exact",
       }}>
@@ -189,31 +197,11 @@ export default function ContactPage({ lifestylePhotoSrc = "/online-bedsheets.png
           alt=""
           style={{
             width: "794px",
+            height: "auto",
             display: "block",
-            marginTop: "-420px",
+            flexShrink: 0,
           }}
         />
-        {/* Gradient overlay at top for smooth transition */}
-        <div style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "60px",
-          background: "linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)",
-          WebkitPrintColorAdjust: "exact",
-          printColorAdjust: "exact",
-        }} />
-        {/* Brand watermark */}
-        <div style={{
-          position: "absolute",
-          bottom: "36px",
-          right: "44px",
-          opacity: 0.5,
-        }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/clover-logo.png" alt="" style={{ height: "28px", width: "auto" }} />
-        </div>
       </div>
 
       {/* ══ FOOTER — same green bar as PhotoPage ══ */}
