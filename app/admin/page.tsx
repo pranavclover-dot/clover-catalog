@@ -19,12 +19,15 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
     const r = await fetch("/api/catalog/list", { cache: "no-store" });
     const { entries } = await r.json();
     setEntries(entries ?? []);
+    setSelected(new Set());
     setLoading(false);
   };
 
@@ -32,24 +35,52 @@ export default function AdminPage() {
     if (authed) load();
   }, [authed]);
 
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelected(selected.size === entries.length ? new Set() : new Set(entries.map((e) => e.id)));
+  };
+
+  const deleteOne = async (entry: Entry): Promise<boolean> => {
+    const r = await fetch("/api/catalog/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: entry.file_url, key: key.trim() }),
+    });
+    return r.ok;
+  };
+
   const handleDelete = async (entry: Entry) => {
     if (!confirm(`Delete "${entry.product_code}"? This cannot be undone.`)) return;
     setDeleting(entry.id);
     try {
-      const r = await fetch("/api/catalog/delete", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: entry.file_url, key: key.trim() }),
-      });
-      if (!r.ok) {
-        const d = await r.json();
-        alert("Error: " + (d.error ?? "Failed"));
-      } else {
-        setEntries((prev) => prev.filter((e) => e.id !== entry.id));
-      }
+      const ok = await deleteOne(entry);
+      if (!ok) alert("Error: Failed to delete");
+      else setEntries((prev) => prev.filter((e) => e.id !== entry.id));
     } finally {
       setDeleting(null);
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const count = selected.size;
+    if (!count) return;
+    if (!confirm(`Delete ${count} selected catalog${count > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    setBulkDeleting(true);
+    const toDelete = entries.filter((e) => selected.has(e.id));
+    const results = await Promise.allSettled(toDelete.map(deleteOne));
+    const failed = results.filter((r) => r.status === "rejected" || (r.status === "fulfilled" && !r.value)).length;
+    const deletedIds = new Set(toDelete.filter((_, i) => results[i].status === "fulfilled" && (results[i] as PromiseFulfilledResult<boolean>).value).map((e) => e.id));
+    setEntries((prev) => prev.filter((e) => !deletedIds.has(e.id)));
+    setSelected(new Set());
+    setBulkDeleting(false);
+    if (failed > 0) alert(`${failed} item(s) failed to delete.`);
   };
 
   /* ── Login screen ── */
@@ -78,7 +109,6 @@ export default function AdminPage() {
               setVerifying(true);
               setError("");
               try {
-                // Send key with no URL — server returns 400 if auth passes, 401 if wrong key
                 const r = await fetch("/api/catalog/delete", {
                   method: "DELETE",
                   headers: { "Content-Type": "application/json" },
@@ -102,6 +132,9 @@ export default function AdminPage() {
     );
   }
 
+  const allSelected = entries.length > 0 && selected.size === entries.length;
+  const someSelected = selected.size > 0;
+
   /* ── Admin panel ── */
   return (
     <div style={{ minHeight: "100vh", background: "#f8f5f0", fontFamily: "'Inter', sans-serif" }}>
@@ -118,12 +151,40 @@ export default function AdminPage() {
       <div style={{ height: "3px", backgroundColor: "#e53e3e" }} />
 
       <div style={{ maxWidth: "900px", margin: "0 auto", padding: "32px 24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "28px" }}>
+
+        {/* Title row */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
           <h1 style={{ fontSize: "24px", fontWeight: 900, color: "#0a0a0a", margin: 0 }}>
             Delete Catalogs
           </h1>
           <span style={{ fontSize: "13px", color: "#888" }}>{entries.length} total</span>
         </div>
+
+        {/* Bulk action bar — only shown when items are selected */}
+        {someSelected && (
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            background: "#fff8f8", border: "1.5px solid #fcc", borderRadius: "12px",
+            padding: "12px 20px", marginBottom: "16px",
+          }}>
+            <span style={{ fontSize: "14px", fontWeight: 700, color: "#e53e3e" }}>
+              {selected.size} selected
+            </span>
+            <button
+              onClick={handleBulkDelete}
+              disabled={bulkDeleting}
+              style={{
+                padding: "8px 20px", backgroundColor: bulkDeleting ? "#fcc" : "#e53e3e",
+                color: "white", border: "none", borderRadius: "8px",
+                fontSize: "13px", fontWeight: 700,
+                cursor: bulkDeleting ? "not-allowed" : "pointer",
+                opacity: bulkDeleting ? 0.7 : 1,
+              }}
+            >
+              {bulkDeleting ? "Deleting…" : `Delete ${selected.size}`}
+            </button>
+          </div>
+        )}
 
         {loading && (
           <div style={{ textAlign: "center", padding: "60px 0", color: "#0e6b3a" }}>
@@ -140,60 +201,93 @@ export default function AdminPage() {
         )}
 
         {!loading && entries.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            {entries.map((entry) => (
-              <div
-                key={entry.id}
-                style={{ background: "white", borderRadius: "12px", padding: "16px 20px", boxShadow: "0 1px 6px rgba(0,0,0,0.07)", display: "flex", alignItems: "center", gap: "16px" }}
-              >
-                {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: "10px", fontWeight: 700, color: "#0e6b3a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>
-                    {entry.category}
-                  </div>
-                  <div style={{ fontSize: "15px", fontWeight: 800, color: "#111", marginBottom: "1px" }}>
-                    {entry.product_code}
-                  </div>
-                  {entry.product_type && (
-                    <div style={{ fontSize: "12px", color: "#888" }}>{entry.product_type}</div>
-                  )}
-                  <div style={{ fontSize: "11px", color: "#bbb", marginTop: "4px" }}>
-                    {new Date(entry.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                  </div>
-                </div>
+          <>
+            {/* Select all row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", padding: "0 4px" }}>
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleAll}
+                style={{ width: "16px", height: "16px", cursor: "pointer", accentColor: "#0e6b3a" }}
+              />
+              <span style={{ fontSize: "12px", color: "#888", fontWeight: 600 }}>
+                {allSelected ? "Deselect all" : "Select all"}
+              </span>
+            </div>
 
-                {/* View link */}
-                <a
-                  href={entry.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ fontSize: "12px", color: "#0e6b3a", fontWeight: 600, textDecoration: "none", flexShrink: 0 }}
-                >
-                  View PDF
-                </a>
-
-                {/* Delete button */}
-                <button
-                  onClick={() => handleDelete(entry)}
-                  disabled={deleting === entry.id}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {entries.map((entry) => (
+                <div
+                  key={entry.id}
+                  onClick={() => toggleSelect(entry.id)}
                   style={{
-                    padding: "8px 16px",
-                    backgroundColor: deleting === entry.id ? "#fcc" : "#fff0f0",
-                    color: "#e53e3e",
-                    border: "1.5px solid #fcc",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    cursor: deleting === entry.id ? "not-allowed" : "pointer",
-                    flexShrink: 0,
-                    transition: "all 0.15s",
+                    background: selected.has(entry.id) ? "#fff8f8" : "white",
+                    borderRadius: "12px", padding: "16px 20px",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.07)",
+                    display: "flex", alignItems: "center", gap: "16px",
+                    border: selected.has(entry.id) ? "1.5px solid #fca5a5" : "1.5px solid transparent",
+                    cursor: "pointer", transition: "all 0.12s",
                   }}
                 >
-                  {deleting === entry.id ? "Deleting…" : "Delete"}
-                </button>
-              </div>
-            ))}
-          </div>
+                  {/* Checkbox */}
+                  <input
+                    type="checkbox"
+                    checked={selected.has(entry.id)}
+                    onChange={() => toggleSelect(entry.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ width: "16px", height: "16px", flexShrink: 0, cursor: "pointer", accentColor: "#e53e3e" }}
+                  />
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }} onClick={(e) => e.stopPropagation()}>
+                    <div style={{ fontSize: "10px", fontWeight: 700, color: "#0e6b3a", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" }}>
+                      {entry.category}
+                    </div>
+                    <div style={{ fontSize: "15px", fontWeight: 800, color: "#111", marginBottom: "1px" }}>
+                      {entry.product_code}
+                    </div>
+                    {entry.product_type && (
+                      <div style={{ fontSize: "12px", color: "#888" }}>{entry.product_type}</div>
+                    )}
+                    <div style={{ fontSize: "11px", color: "#bbb", marginTop: "4px" }}>
+                      {new Date(entry.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                    </div>
+                  </div>
+
+                  {/* View link */}
+                  <a
+                    href={entry.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ fontSize: "12px", color: "#0e6b3a", fontWeight: 600, textDecoration: "none", flexShrink: 0 }}
+                  >
+                    View PDF
+                  </a>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(entry); }}
+                    disabled={deleting === entry.id || bulkDeleting}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: deleting === entry.id ? "#fcc" : "#fff0f0",
+                      color: "#e53e3e",
+                      border: "1.5px solid #fcc",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      cursor: (deleting === entry.id || bulkDeleting) ? "not-allowed" : "pointer",
+                      flexShrink: 0,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {deleting === entry.id ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
