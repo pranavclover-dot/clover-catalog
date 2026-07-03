@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -67,21 +68,34 @@ export default function AdminPage() {
             value={key}
             onChange={(e) => setKey(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                if (key.trim()) { setAuthed(true); setError(""); }
-                else setError("Please enter a key.");
-              }
+              if (e.key === "Enter") (e.currentTarget.nextElementSibling as HTMLButtonElement)?.click();
             }}
             style={{ width: "100%", padding: "10px 14px", borderRadius: "8px", border: "1.5px solid #e0e0e0", fontSize: "14px", outline: "none", boxSizing: "border-box", marginBottom: "12px" }}
           />
           <button
-            onClick={() => {
-              if (key.trim()) { setAuthed(true); setError(""); }
-              else setError("Please enter a key.");
+            onClick={async () => {
+              if (!key.trim()) { setError("Please enter a key."); return; }
+              setVerifying(true);
+              setError("");
+              try {
+                // Send key with no URL — server returns 400 if auth passes, 401 if wrong key
+                const r = await fetch("/api/catalog/delete", {
+                  method: "DELETE",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ key: key.trim() }),
+                });
+                if (r.status === 401) { setError("Wrong admin key. Try again."); }
+                else { setAuthed(true); setError(""); }
+              } catch {
+                setError("Network error. Try again.");
+              } finally {
+                setVerifying(false);
+              }
             }}
-            style={{ width: "100%", padding: "11px", backgroundColor: "#0e6b3a", color: "white", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}
+            disabled={verifying}
+            style={{ width: "100%", padding: "11px", backgroundColor: "#0e6b3a", color: "white", border: "none", borderRadius: "8px", fontSize: "14px", fontWeight: 700, cursor: verifying ? "not-allowed" : "pointer", opacity: verifying ? 0.7 : 1 }}
           >
-            Enter
+            {verifying ? "Checking…" : "Enter"}
           </button>
         </div>
       </div>
