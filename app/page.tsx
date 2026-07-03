@@ -271,10 +271,14 @@ export default function HomePage() {
   }
   const coverPhoto = CATEGORY_PHOTO[category] ?? "/lifestyle.svg";
 
-  // Chrome-only guard — allows desktop Chrome and Android Chrome; blocks iOS (CriOS/WebKit), Firefox, Safari, etc.
+  // Chrome-only guard — allows desktop Chrome, Android Chrome, and iOS Chrome (CriOS); blocks Safari, Firefox, etc.
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
   const isIOS = /iPhone|iPad|iPod/.test(ua);
-  const isChrome = typeof navigator !== "undefined" && /Chrome\//.test(ua) && /Google Inc/.test(navigator.vendor) && !isIOS;
+  const isIOSChrome = /CriOS\//.test(ua); // Chrome on iOS identifies as CriOS, not Chrome
+  const isChrome = typeof navigator !== "undefined" && (
+    (/Chrome\//.test(ua) && /Google Inc/.test(navigator.vendor)) || // desktop + Android Chrome
+    isIOSChrome // iOS Chrome
+  );
   if (typeof navigator !== "undefined" && !isChrome) {
     const isAndroid = /Android/.test(ua);
     return (
@@ -286,17 +290,22 @@ export default function HomePage() {
           <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#0a0a0a", margin: "0 0 10px" }}>Chrome Required</h2>
           <p style={{ color: "#666", fontSize: "14px", lineHeight: 1.6, margin: "0 0 20px" }}>
             {isIOS
-              ? <>This app does not work on iPhone or iPad. Please use <strong>Chrome on an Android phone</strong> or a <strong>desktop/laptop</strong>.</>
-              : <>This catalog generator works on <strong>Google Chrome</strong> — on desktop or Android. Please open this page in Chrome.</>
+              ? <>This app requires <strong>Google Chrome</strong>. You&apos;re on Safari or another browser — please open this page in the <strong>Chrome app</strong> instead.</>
+              : <>This catalog generator works on <strong>Google Chrome</strong> — on desktop, Android, or iPhone/iPad. Please open this page in Chrome.</>
             }
           </p>
-          {!isIOS && (
-            <a href={isAndroid ? "https://play.google.com/store/apps/details?id=com.android.chrome" : "https://www.google.com/chrome/"}
-              target="_blank" rel="noopener noreferrer"
-              style={{ display: "inline-block", padding: "10px 24px", backgroundColor: "#0e6b3a", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: 700 }}>
-              Download Chrome
-            </a>
-          )}
+          <a
+            href={
+              isIOS
+                ? "https://apps.apple.com/app/google-chrome/id535886823"
+                : isAndroid
+                  ? "https://play.google.com/store/apps/details?id=com.android.chrome"
+                  : "https://www.google.com/chrome/"
+            }
+            target="_blank" rel="noopener noreferrer"
+            style={{ display: "inline-block", padding: "10px 24px", backgroundColor: "#0e6b3a", color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: 700 }}>
+            {isIOS ? "Get Chrome on the App Store" : "Download Chrome"}
+          </a>
         </div>
       </div>
     );
