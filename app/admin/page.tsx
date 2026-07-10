@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AddPhotosModal from "./AddPhotosModal";
 
 interface Entry {
   id: string;
@@ -22,6 +23,7 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [search, setSearch] = useState("");
+  const [addingPhotosTo, setAddingPhotosTo] = useState<Entry | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -155,6 +157,7 @@ export default function AdminPage() {
 
   /* ── Admin panel ── */
   return (
+    <>
     <div style={{ minHeight: "100vh", background: "#f8f5f0", fontFamily: "'Inter', sans-serif" }}>
       {/* Header */}
       <header style={{ backgroundColor: "#0e6b3a", padding: "0 24px", height: "64px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -318,6 +321,20 @@ export default function AdminPage() {
                     View PDF
                   </a>
 
+                  {/* Add Photos button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setAddingPhotosTo(entry); }}
+                    disabled={bulkDeleting}
+                    style={{
+                      padding: "8px 14px", backgroundColor: "#f0f7f3",
+                      color: "#0e6b3a", border: "1.5px solid #a7f3d0",
+                      borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+                      cursor: bulkDeleting ? "not-allowed" : "pointer", flexShrink: 0,
+                    }}
+                  >
+                    + Photos
+                  </button>
+
                   {/* Delete button */}
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(entry); }}
@@ -344,5 +361,15 @@ export default function AdminPage() {
         )}
       </div>
     </div>
+
+    {/* Add Photos modal */}
+    {addingPhotosTo && (
+      <AddPhotosModal
+        entry={addingPhotosTo}
+        adminKey={key}
+        onClose={() => setAddingPhotosTo(null)}
+      />
+    )}
+    </>
   );
 }
