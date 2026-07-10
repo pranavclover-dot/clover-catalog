@@ -18,6 +18,7 @@ export default function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [copiedCat, setCopiedCat] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     // Read ?category= from URL on load
@@ -36,10 +37,16 @@ export default function CatalogPage() {
 
   const categories = ["All", ...Array.from(new Set(entries.map((e) => e.category))).sort()];
 
-  const visible =
-    activeCategory === "All"
-      ? entries
-      : entries.filter((e) => e.category === activeCategory);
+  const q = search.trim().toLowerCase();
+  const visible = entries
+    .filter((e) => activeCategory === "All" || e.category === activeCategory)
+    .filter((e) =>
+      !q ||
+      e.product_code.toLowerCase().includes(q) ||
+      e.product_type.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q)
+    )
+    .sort((a, b) => a.product_code.localeCompare(b.product_code));
 
   const copyLink = (cat: string) => {
     const url = cat === "All"
@@ -78,6 +85,32 @@ export default function CatalogPage() {
           <p style={{ color: "#888", fontSize: "14px", margin: 0 }}>
             {BRAND.companyName} · {entries.length} catalog{entries.length !== 1 ? "s" : ""}
           </p>
+        </div>
+
+        {/* Search bar */}
+        <div style={{ position: "relative", marginBottom: "20px" }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", pointerEvents: "none" }}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by product code, type or category…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "100%", padding: "11px 40px 11px 40px",
+              borderRadius: "10px", border: "1.5px solid #e0e0e0",
+              fontSize: "14px", outline: "none", background: "white",
+              boxSizing: "border-box", color: "#111",
+            }}
+          />
+          {search && (
+            <button onClick={() => setSearch("")}
+              style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#aaa", fontSize: "16px", lineHeight: 1 }}>
+              ×
+            </button>
+          )}
         </div>
 
         {/* Category tabs */}
@@ -146,7 +179,7 @@ export default function CatalogPage() {
         {!loading && visible.length === 0 && (
           <div style={{ textAlign: "center", padding: "80px 0", color: "#aaa" }}>
             <div style={{ fontSize: "48px", marginBottom: "12px" }}>📂</div>
-            <p style={{ margin: 0, fontSize: "15px" }}>No catalogs yet in this category.</p>
+            <p style={{ margin: 0, fontSize: "15px" }}>{q ? `No results for "${search}"` : "No catalogs yet in this category."}</p>
           </div>
         )}
 

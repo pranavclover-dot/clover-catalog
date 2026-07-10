@@ -21,6 +21,7 @@ export default function AdminPage() {
   const [verifying, setVerifying] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [search, setSearch] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -44,7 +45,14 @@ export default function AdminPage() {
   };
 
   const toggleAll = () => {
-    setSelected(selected.size === entries.length ? new Set() : new Set(entries.map((e) => e.id)));
+    const filteredIds = filtered.map((e) => e.id);
+    const allFilteredSelected = filteredIds.every((id) => selected.has(id));
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (allFilteredSelected) filteredIds.forEach((id) => next.delete(id));
+      else filteredIds.forEach((id) => next.add(id));
+      return next;
+    });
   };
 
   const deleteOne = async (entry: Entry): Promise<boolean> => {
@@ -132,7 +140,17 @@ export default function AdminPage() {
     );
   }
 
-  const allSelected = entries.length > 0 && selected.size === entries.length;
+  const q = search.trim().toLowerCase();
+  const filtered = entries
+    .filter((e) =>
+      !q ||
+      e.product_code.toLowerCase().includes(q) ||
+      e.product_type.toLowerCase().includes(q) ||
+      e.category.toLowerCase().includes(q)
+    )
+    .sort((a, b) => a.product_code.localeCompare(b.product_code));
+
+  const allSelected = filtered.length > 0 && filtered.every((e) => selected.has(e.id));
   const someSelected = selected.size > 0;
 
   /* ── Admin panel ── */
@@ -157,7 +175,35 @@ export default function AdminPage() {
           <h1 style={{ fontSize: "24px", fontWeight: 900, color: "#0a0a0a", margin: 0 }}>
             Delete Catalogs
           </h1>
-          <span style={{ fontSize: "13px", color: "#888" }}>{entries.length} total</span>
+          <span style={{ fontSize: "13px", color: "#888" }}>
+            {q ? `${filtered.length} of ${entries.length}` : `${entries.length} total`}
+          </span>
+        </div>
+
+        {/* Search bar */}
+        <div style={{ position: "relative", marginBottom: "16px" }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", width: "16px", height: "16px", pointerEvents: "none" }}>
+            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by product code, type or category…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{
+              width: "100%", padding: "11px 40px 11px 40px",
+              borderRadius: "10px", border: "1.5px solid #e0e0e0",
+              fontSize: "14px", outline: "none", background: "white",
+              boxSizing: "border-box", color: "#111",
+            }}
+          />
+          {search && (
+            <button onClick={() => setSearch("")}
+              style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#aaa", fontSize: "16px", lineHeight: 1 }}>
+              ×
+            </button>
+          )}
         </div>
 
         {/* Bulk action bar — only shown when items are selected */}
@@ -200,7 +246,14 @@ export default function AdminPage() {
           </div>
         )}
 
-        {!loading && entries.length > 0 && (
+        {!loading && entries.length > 0 && filtered.length === 0 && (
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#aaa" }}>
+            <div style={{ fontSize: "40px", marginBottom: "10px" }}>🔍</div>
+            <p style={{ margin: 0 }}>No results for &ldquo;{search}&rdquo;</p>
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
           <>
             {/* Select all row */}
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px", padding: "0 4px" }}>
@@ -216,7 +269,7 @@ export default function AdminPage() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {entries.map((entry) => (
+              {filtered.map((entry) => (
                 <div
                   key={entry.id}
                   onClick={() => toggleSelect(entry.id)}
