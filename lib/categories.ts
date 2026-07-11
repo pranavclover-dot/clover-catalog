@@ -44,6 +44,12 @@ export const CATEGORIES: Record<string, string> = {
   Stools:
     "Clover stools come in 9mm and 12mm MDF and ply-top constructions with decorated and metallic leg variants — named after Indian instruments: Bansuri, Tabla, Sitar, Dholak, and more. Kids' variants available. Price range is ₹1,270 to ₹4,520 MRP. A practical cross-sell for customers furnishing a bedroom, kids' room, or dressing area — at a fraction of furniture-store pricing.",
 
+  "Wedding and Gift Sets":
+    "Clover's wedding and gift sets are available in 4-piece, 5-piece, and 6-piece configurations — 1 comforter + 1 sheet + 2 pillow covers as the base, scaling up to full king-size and premium printed sets. Price range is ₹525 to ₹21,800. Designed for weddings, Diwali, and festival gifting — factory pricing keeps them 40–50% below showroom rates for the same construction. Packaging is gift-ready.",
+
+  "Wedding and Gift Sets":
+    "Clover's wedding and gift sets are available in 4-piece, 5-piece, and 6-piece configurations — 1 comforter + 1 sheet + 2 pillow covers as the base, scaling up to full king-size and premium printed sets. Price range is ₹525 to ₹21,800. Designed for weddings, Diwali, and festival gifting — factory pricing keeps them 40–50% below showroom rates for the same construction. Packaging is gift-ready.",
+
   Comforters: "",
   Rugs: "",
   "Top Sheets": "",
@@ -66,6 +72,7 @@ export const CATEGORY_PHOTO: Record<string, string> = {
   "Blankets":         "/Blankets.png",
   "Charity Blankets": "/Donation blanket.png",
   "Hotel Linens":     "/Hotel Linens.png",
-  "Towels":           "/Towels.png",
-  "Stools":           "/Stool.jpeg",
+  "Towels":                "/Towels.png",
+  "Stools":                "/Stool.jpeg",
+  "Wedding and Gift Sets": "/Wedding and Gift Sets.png",
 };
