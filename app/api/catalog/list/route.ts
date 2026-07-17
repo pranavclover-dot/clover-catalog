@@ -1,44 +1,54 @@
 import { NextResponse } from "next/server";
-import { list } from "@vercel/blob";
+import { ListObjectsV2Command } from "@aws-sdk/client-s3";
+import { r2, BUCKET, PUBLIC_URL } from "@/lib/r2";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: "catalogs/" });
+    const allObjects: { key: string; lastModified: Date }[] = [];
 
-    // Build a map of thumbnail URLs keyed by their base filename
+    // Paginate through all objects under catalogs/
+    let continuationToken: string | undefined;
+    do {
+      const res = await r2.send(new ListObjectsV2Command({
+        Bucket: BUCKET,
+        Prefix: "catalogs/",
+        ContinuationToken: continuationToken,
+      }));
+      for (const obj of res.Contents ?? []) {
+        if (obj.Key) allObjects.push({ key: obj.Key, lastModified: obj.LastModified ?? new Date(0) });
+      }
+      continuationToken = res.IsTruncated ? res.NextContinuationToken : undefined;
+    } while (continuationToken);
+
+    // Build thumbnail map: base filename → public URL
     const thumbMap = new Map<string, string>();
-    blobs
-      .filter((b) => b.pathname.endsWith(".thumb.jpg"))
-      .forEach((b) => {
-        const parts = b.pathname.split("/");
+    allObjects
+      .filter((o) => o.key.endsWith(".thumb.jpg"))
+      .forEach((o) => {
+        const parts = o.key.split("/");
         const base = (parts[2] ?? "").replace(/\.thumb\.jpg$/, "");
-        thumbMap.set(base, b.url);
+        thumbMap.set(base, `${PUBLIC_URL}/${o.key}`);
       });
 
-    const entries = blobs
-      .filter((b) => b.pathname.endsWith(".pdf"))
-      .map((b) => {
-        // pathname: "catalogs/{category}/{CODE}--{TYPE}--{ts}.pdf"  (current format)
-        //       or: "catalogs/{category}/{CODE}.{TYPE}.{ts}.pdf"    (intermediate format)
-        //       or: "catalogs/{category}/{CODE}__{TYPE}__{ts}.pdf"  (legacy format)
-        const parts = b.pathname.split("/");
+    const entries = allObjects
+      .filter((o) => o.key.endsWith(".pdf"))
+      .map((o) => {
+        const parts = o.key.split("/");
         const category = (parts[1] ?? "").replace(/-/g, " ");
         const filename = (parts[2] ?? "").replace(/\.pdf$/i, "");
+
         let product_code: string, product_type: string;
         if (filename.includes("--")) {
-          // current double-hyphen format: CODE--TYPE--TIMESTAMP
           const segs = filename.split("--");
           product_code = segs[0] ?? "";
           product_type = (segs[1] ?? "").replace(/^na$/, "").replace(/-/g, " ");
         } else if (filename.includes("__")) {
-          // legacy underscore format
           const segs = filename.split("__");
           product_code = (segs[0] ?? "").replace(/_/g, " ");
           product_type = (segs[1] ?? "").replace(/_/g, " ").replace(/^-$/, "");
         } else {
-          // intermediate dot format: CODE.TYPE.TIMESTAMP
           const firstDot = filename.indexOf(".");
           const afterCode = firstDot >= 0 ? filename.slice(firstDot + 1) : "";
           product_code = firstDot >= 0 ? filename.slice(0, firstDot) : filename;
@@ -46,21 +56,18 @@ export async function GET() {
           const typeRaw = secondDot >= 0 ? afterCode.slice(0, secondDot) : afterCode;
           product_type = typeRaw.replace(/-/g, " ").replace(/^-$/, "").replace(/^na$/, "").trim();
         }
+
         return {
-          id: b.pathname,
+          id: o.key,
           category,
           product_code,
           product_type,
-          file_url: b.url,
+          file_url: `${PUBLIC_URL}/${o.key}`,
           thumbnail_url: thumbMap.get(filename) ?? null,
-          createdAt: b.uploadedAt instanceof Date
-            ? b.uploadedAt.toISOString()
-            : String(b.uploadedAt),
+          createdAt: o.lastModified.toISOString(),
         };
       })
-      .sort((a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return NextResponse.json({ entries });
   } catch {

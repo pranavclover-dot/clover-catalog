@@ -47,9 +47,6 @@ export const CATEGORIES: Record<string, string> = {
   "Wedding and Gift Sets":
     "Clover's wedding and gift sets are available in 4-piece, 5-piece, and 6-piece configurations — 1 comforter + 1 sheet + 2 pillow covers as the base, scaling up to full king-size and premium printed sets. Price range is ₹525 to ₹21,800. Designed for weddings, Diwali, and festival gifting — factory pricing keeps them 40–50% below showroom rates for the same construction. Packaging is gift-ready.",
 
-  "Wedding and Gift Sets":
-    "Clover's wedding and gift sets are available in 4-piece, 5-piece, and 6-piece configurations — 1 comforter + 1 sheet + 2 pillow covers as the base, scaling up to full king-size and premium printed sets. Price range is ₹525 to ₹21,800. Designed for weddings, Diwali, and festival gifting — factory pricing keeps them 40–50% below showroom rates for the same construction. Packaging is gift-ready.",
-
   Comforters: "",
   Rugs: "",
   "Top Sheets": "",

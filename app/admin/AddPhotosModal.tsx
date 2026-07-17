@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { upload } from "@vercel/blob/client";
 import PhotoPage from "@/app/_pdf/PhotoPage";
 
 interface Photo {
@@ -143,12 +142,16 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
 
       const mergedBytes = await merged.save();
 
-      // ── Re-upload to same Vercel Blob path (overwrites) ───────────
+      // ── Re-upload to same R2 path (overwrites) ────────────────────
       setStatusMsg("Uploading updated PDF…");
       const blobPath = new URL(entry.file_url).pathname.slice(1);
-      const filename = blobPath.split("/").pop()!;
-      const mergedFile = new File([new Uint8Array(mergedBytes)], filename, { type: "application/pdf" });
-      await upload(blobPath, mergedFile, { access: "public", handleUploadUrl: "/api/catalog/upload" });
+      const mergedBlob = new Blob([new Uint8Array(mergedBytes)], { type: "application/pdf" });
+      const { uploadUrl } = await fetch("/api/catalog/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pathname: blobPath, contentType: "application/pdf" }),
+      }).then((r) => r.json());
+      await fetch(uploadUrl, { method: "PUT", body: mergedBlob, headers: { "Content-Type": "application/pdf" } });
 
       setStep("done");
     } catch (err) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { upload } from "@vercel/blob/client";
 import { CATEGORIES, CATEGORY_NAMES, CATEGORY_PHOTO } from "@/lib/categories";
 import { BRAND } from "@/lib/brand";
 import Cover from "@/app/_pdf/Cover";
@@ -191,41 +190,44 @@ export default function HomePage() {
     try {
       const blobData = await fetch(pdfUrl).then((r) => r.blob());
 
-      // Vercel Blob only allows [a-zA-Z0-9\-] in pathnames (no underscores, spaces, %, dots in segments).
-      // Filename format: CODE--TYPE--TIMESTAMP.pdf  (double-hyphen separator, single-hyphen in content)
       const sanitize = (s: string) =>
         s.trim()
-         .replace(/[^a-zA-Z0-9\s]/g, " ")  // replace %, -, &, etc. with space
+         .replace(/[^a-zA-Z0-9\s]/g, " ")
          .trim()
-         .replace(/\s+/g, "-")              // spaces → hyphens
-         .replace(/-+/g, "-")               // collapse consecutive hyphens
-         .replace(/^-|-$/g, "")             // trim edge hyphens
+         .replace(/\s+/g, "-")
+         .replace(/-+/g, "-")
+         .replace(/^-|-$/g, "")
          || "x";
       const safeCode = sanitize(productCode);
       const safeType = productType.trim() ? sanitize(productType) : "na";
       const safeCategory = sanitize(category);
       const filename = `${safeCode}--${safeType}--${Date.now()}.pdf`;
-      // Upload PDF directly to Vercel Blob CDN — bypasses the 4.5MB function body limit
-      const file = new File([blobData], filename, { type: "application/pdf" });
-      await upload(`catalogs/${safeCategory}/${filename}`, file, {
-        access: "public",
-        handleUploadUrl: "/api/catalog/upload",
-      });
+      const pathname = `catalogs/${safeCategory}/${filename}`;
+
+      // Get presigned URL then PUT directly to R2 (no size limit)
+      const { uploadUrl } = await fetch("/api/catalog/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pathname, contentType: "application/pdf" }),
+      }).then((r) => r.json());
+      await fetch(uploadUrl, { method: "PUT", body: blobData, headers: { "Content-Type": "application/pdf" } });
 
       // Upload thumbnail (non-fatal)
       if (photos.length > 0) {
         try {
           const thumbBase = filename.replace(/\.pdf$/, "");
+          const thumbPathname = `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`;
           const [, b64] = photos[0].dataUrl.split(",");
           const bytes = Uint8Array.from(atob(b64 ?? ""), (c) => c.charCodeAt(0));
           const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
-          const thumbFile = new File([thumbBlob], `${thumbBase}.thumb.jpg`, { type: "image/jpeg" });
-          await upload(`catalogs/${safeCategory}/${thumbBase}.thumb.jpg`, thumbFile, {
-            access: "public",
-            handleUploadUrl: "/api/catalog/upload",
-          });
+          const { uploadUrl: thumbUploadUrl } = await fetch("/api/catalog/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pathname: thumbPathname, contentType: "image/jpeg" }),
+          }).then((r) => r.json());
+          await fetch(thumbUploadUrl, { method: "PUT", body: thumbBlob, headers: { "Content-Type": "image/jpeg" } });
         } catch {
-          // thumbnail failure is non-fatal — PDF is already saved
+          // thumbnail failure is non-fatal
         }
       }
 
