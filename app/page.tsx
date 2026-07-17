@@ -205,12 +205,14 @@ export default function HomePage() {
       const pathname = `catalogs/${safeCategory}/${filename}`;
 
       // Upload PDF via our API (proxied to R2 — no CORS issues)
-      const uploadRes = await fetch("/api/catalog/upload", {
-        method: "POST",
-        headers: { "x-pathname": pathname, "x-content-type": "application/pdf", "Content-Type": "application/pdf" },
-        body: blobData,
-      });
-      if (!uploadRes.ok) throw new Error((await uploadRes.json()).error ?? "Upload failed");
+      const uploadForm = new FormData();
+      uploadForm.append("file", blobData, filename);
+      uploadForm.append("pathname", pathname);
+      uploadForm.append("contentType", "application/pdf");
+      const uploadRes = await fetch("/api/catalog/upload", { method: "POST", body: uploadForm });
+      let uploadData: { error?: string; publicUrl?: string } = {};
+      try { uploadData = await uploadRes.json(); } catch { /* ignore parse errors */ }
+      if (!uploadRes.ok) throw new Error(uploadData.error ?? `Upload failed (HTTP ${uploadRes.status})`);
 
       // Upload thumbnail (non-fatal)
       if (photos.length > 0) {
@@ -218,13 +220,15 @@ export default function HomePage() {
           const thumbBase = filename.replace(/\.pdf$/, "");
           const thumbPathname = `catalogs/${safeCategory}/${thumbBase}.thumb.jpg`;
           const [, b64] = photos[0].dataUrl.split(",");
-          const bytes = Uint8Array.from(atob(b64 ?? ""), (c) => c.charCodeAt(0));
-          const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
-          await fetch("/api/catalog/upload", {
-            method: "POST",
-            headers: { "x-pathname": thumbPathname, "x-content-type": "image/jpeg", "Content-Type": "image/jpeg" },
-            body: thumbBlob,
-          });
+          if (b64) {
+            const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+            const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
+            const thumbForm = new FormData();
+            thumbForm.append("file", thumbBlob, `${thumbBase}.thumb.jpg`);
+            thumbForm.append("pathname", thumbPathname);
+            thumbForm.append("contentType", "image/jpeg");
+            await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
+          }
         } catch {
           // thumbnail failure is non-fatal
         }

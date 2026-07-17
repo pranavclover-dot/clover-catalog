@@ -3,31 +3,31 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { r2, BUCKET, PUBLIC_URL } from "@/lib/r2";
 
 export const runtime = "nodejs";
-
-// Allow up to 10 MB bodies (covers large PDFs)
 export const maxDuration = 60;
 
-const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/jpg"];
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
 
 export async function POST(req: NextRequest) {
   try {
-    const pathname = req.headers.get("x-pathname");
-    const contentType = req.headers.get("x-content-type") ?? req.headers.get("content-type") ?? "";
+    const formData = await req.formData();
+    const file = formData.get("file") as File | null;
+    const pathname = formData.get("pathname") as string | null;
+    const contentType = (formData.get("contentType") as string | null) ?? "application/pdf";
 
-    if (!pathname) {
-      return NextResponse.json({ error: "x-pathname header required" }, { status: 400 });
+    if (!file || !pathname) {
+      return NextResponse.json({ error: "file and pathname are required" }, { status: 400 });
     }
     if (!ALLOWED_TYPES.includes(contentType)) {
       return NextResponse.json({ error: "Content type not allowed" }, { status: 400 });
     }
 
-    const body = await req.arrayBuffer();
+    const body = Buffer.from(await file.arrayBuffer());
 
     await r2.send(
       new PutObjectCommand({
         Bucket: BUCKET,
         Key: pathname,
-        Body: Buffer.from(body),
+        Body: body,
         ContentType: contentType,
       })
     );
