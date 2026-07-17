@@ -138,7 +138,7 @@ export default function HomePage() {
         });
 
         if (i > 0) pdf.addPage([794, 1123], "portrait");
-        const imgData = canvas.toDataURL("image/jpeg", 0.92);
+        const imgData = canvas.toDataURL("image/jpeg", 0.75);
         pdf.addImage(imgData, "JPEG", 0, 0, 794, 1123);
 
         // Add clickable link overlays on top of the image

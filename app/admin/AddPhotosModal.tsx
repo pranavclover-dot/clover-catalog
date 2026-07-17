@@ -117,7 +117,7 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
           backgroundColor: "#ffffff", width: 794, height: 1123, logging: false,
         });
         if (i > 0) newPdf.addPage([794, 1123], "portrait");
-        newPdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 794, 1123);
+        newPdf.addImage(canvas.toDataURL("image/jpeg", 0.75), "JPEG", 0, 0, 794, 1123);
       }
 
       // ── Merge with pdf-lib ────────────────────────────────────────
