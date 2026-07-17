@@ -204,13 +204,13 @@ export default function HomePage() {
       const filename = `${safeCode}--${safeType}--${Date.now()}.pdf`;
       const pathname = `catalogs/${safeCategory}/${filename}`;
 
-      // Get presigned URL then PUT directly to R2 (no size limit)
-      const { uploadUrl } = await fetch("/api/catalog/upload", {
+      // Upload PDF via our API (proxied to R2 — no CORS issues)
+      const uploadRes = await fetch("/api/catalog/upload", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pathname, contentType: "application/pdf" }),
-      }).then((r) => r.json());
-      await fetch(uploadUrl, { method: "PUT", body: blobData, headers: { "Content-Type": "application/pdf" } });
+        headers: { "x-pathname": pathname, "x-content-type": "application/pdf", "Content-Type": "application/pdf" },
+        body: blobData,
+      });
+      if (!uploadRes.ok) throw new Error((await uploadRes.json()).error ?? "Upload failed");
 
       // Upload thumbnail (non-fatal)
       if (photos.length > 0) {
@@ -220,12 +220,11 @@ export default function HomePage() {
           const [, b64] = photos[0].dataUrl.split(",");
           const bytes = Uint8Array.from(atob(b64 ?? ""), (c) => c.charCodeAt(0));
           const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
-          const { uploadUrl: thumbUploadUrl } = await fetch("/api/catalog/upload", {
+          await fetch("/api/catalog/upload", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pathname: thumbPathname, contentType: "image/jpeg" }),
-          }).then((r) => r.json());
-          await fetch(thumbUploadUrl, { method: "PUT", body: thumbBlob, headers: { "Content-Type": "image/jpeg" } });
+            headers: { "x-pathname": thumbPathname, "x-content-type": "image/jpeg", "Content-Type": "image/jpeg" },
+            body: thumbBlob,
+          });
         } catch {
           // thumbnail failure is non-fatal
         }
