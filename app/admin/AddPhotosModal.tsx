@@ -146,14 +146,12 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
       setStatusMsg("Uploading updated PDF…");
       const blobPath = new URL(entry.file_url).pathname.slice(1);
       const mergedBlob = new Blob([new Uint8Array(mergedBytes)], { type: "application/pdf" });
-      const uploadForm = new FormData();
-      uploadForm.append("file", mergedBlob, blobPath.split("/").pop() ?? "catalog.pdf");
-      uploadForm.append("pathname", blobPath);
-      uploadForm.append("contentType", "application/pdf");
-      const uploadRes = await fetch("/api/catalog/upload", { method: "POST", body: uploadForm });
-      let uploadData: { error?: string } = {};
-      try { uploadData = await uploadRes.json(); } catch { /* ignore parse errors */ }
-      if (!uploadRes.ok) throw new Error(uploadData.error ?? `Upload failed (HTTP ${uploadRes.status})`);
+      const { uploadUrl } = await fetch("/api/catalog/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pathname: blobPath, contentType: "application/pdf" }),
+      }).then((r) => r.json());
+      await fetch(uploadUrl, { method: "PUT", body: mergedBlob, headers: { "Content-Type": "application/pdf" } });
 
       setStep("done");
     } catch (err) {
