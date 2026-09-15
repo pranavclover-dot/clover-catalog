@@ -204,13 +204,15 @@ export default function HomePage() {
       const filename = `${safeCode}--${safeType}--${Date.now()}.pdf`;
       const pathname = `catalogs/${safeCategory}/${filename}`;
 
-      // Get presigned URL → PUT directly to R2 (no Vercel body-size limit)
-      const { uploadUrl } = await fetch("/api/catalog/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pathname, contentType: "application/pdf" }),
-      }).then((r) => r.json());
-      await fetch(uploadUrl, { method: "PUT", body: blobData, headers: { "Content-Type": "application/pdf" } });
+      // Upload PDF via API proxy to R2 (no CORS needed)
+      const uploadForm = new FormData();
+      uploadForm.append("file", blobData, filename);
+      uploadForm.append("pathname", pathname);
+      uploadForm.append("contentType", "application/pdf");
+      const uploadRes = await fetch("/api/catalog/upload", { method: "POST", body: uploadForm });
+      let uploadData: { error?: string } = {};
+      try { uploadData = await uploadRes.json(); } catch { /* ignore */ }
+      if (!uploadRes.ok) throw new Error(uploadData.error ?? `Upload failed (HTTP ${uploadRes.status})`);
 
       // Upload thumbnail (non-fatal)
       if (photos.length > 0) {
@@ -221,12 +223,11 @@ export default function HomePage() {
           if (b64) {
             const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
             const thumbBlob = new Blob([bytes], { type: "image/jpeg" });
-            const { uploadUrl: thumbUrl } = await fetch("/api/catalog/upload", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ pathname: thumbPathname, contentType: "image/jpeg" }),
-            }).then((r) => r.json());
-            await fetch(thumbUrl, { method: "PUT", body: thumbBlob, headers: { "Content-Type": "image/jpeg" } });
+            const thumbForm = new FormData();
+            thumbForm.append("file", thumbBlob, `${thumbBase}.thumb.jpg`);
+            thumbForm.append("pathname", thumbPathname);
+            thumbForm.append("contentType", "image/jpeg");
+            await fetch("/api/catalog/upload", { method: "POST", body: thumbForm });
           }
         } catch {
           // thumbnail failure is non-fatal
