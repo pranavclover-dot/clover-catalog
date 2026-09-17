@@ -88,7 +88,7 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
     try {
       // ── Load everything in parallel ──────────────────────────────
       const [existingBytes, { default: html2canvas }, { default: jsPDF }, { PDFDocument }] = await Promise.all([
-        fetch(entry.file_url).then((r) => r.arrayBuffer()),
+        fetch(`/api/catalog/file?url=${encodeURIComponent(entry.file_url)}`).then((r) => r.arrayBuffer()),
         import("html2canvas"),
         import("jspdf"),
         import("pdf-lib"),
