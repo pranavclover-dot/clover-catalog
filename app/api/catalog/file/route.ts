@@ -15,8 +15,9 @@ export async function GET(req: NextRequest) {
     const key = url.replace(`${PUBLIC_URL}/`, "");
 
     const res = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
-    const body = await res.Body?.transformToByteArray();
-    if (!body) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const bytes = await res.Body?.transformToByteArray();
+    if (!bytes) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const body = Buffer.from(bytes);
 
     return new NextResponse(body, {
       headers: {
