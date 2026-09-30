@@ -114,11 +114,11 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
       const newPdf = new jsPDF({ orientation: "portrait", unit: "px", format: [794, 1123] });
       for (let i = 0; i < pageEls.length; i++) {
         const canvas = await html2canvas(pageEls[i], {
-          scale: 2, useCORS: true, allowTaint: true,
+          scale: 1.5, useCORS: true, allowTaint: true,
           backgroundColor: "#ffffff", width: 794, height: 1123, logging: false,
         });
         if (i > 0) newPdf.addPage([794, 1123], "portrait");
-        newPdf.addImage(canvas.toDataURL("image/jpeg", 0.75), "JPEG", 0, 0, 794, 1123);
+        newPdf.addImage(canvas.toDataURL("image/jpeg", 0.6), "JPEG", 0, 0, 794, 1123);
       }
 
       // ── Send only new pages to server; server merges & re-uploads ─
