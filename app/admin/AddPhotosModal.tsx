@@ -86,14 +86,15 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
     setStatusMsg("Loading existing PDF…");
 
     try {
-      // ── Load everything in parallel ──────────────────────────────
-      const [existingBytes, { default: html2canvas }, { default: jsPDF }, { PDFDocument }] = await Promise.all([
+      // ── Load existing page count + dynamic imports in parallel ────
+      const [existingBytes, { default: html2canvas }, { default: jsPDF }] = await Promise.all([
         fetch(`/api/catalog/file?url=${encodeURIComponent(entry.file_url)}`).then((r) => r.arrayBuffer()),
         import("html2canvas"),
         import("jspdf"),
-        import("pdf-lib"),
       ]);
 
+      // Count pages so PhotoPage numbering starts correctly
+      const { PDFDocument } = await import("pdf-lib");
       const existingDoc = await PDFDocument.load(existingBytes);
       const count = existingDoc.getPageCount();
 
@@ -120,48 +121,20 @@ export default function AddPhotosModal({ entry, adminKey, onClose }: Props) {
         newPdf.addImage(canvas.toDataURL("image/jpeg", 0.75), "JPEG", 0, 0, 794, 1123);
       }
 
-      // ── Merge with pdf-lib ────────────────────────────────────────
-      setStatusMsg("Merging PDFs…");
+      // ── Send only new pages to server; server merges & re-uploads ─
+      setStatusMsg("Merging & uploading…");
       const newPdfBytes = newPdf.output("arraybuffer");
-      const newDoc = await PDFDocument.load(newPdfBytes);
-      const merged = await PDFDocument.create();
+      const newPdfBlob = new Blob([newPdfBytes], { type: "application/pdf" });
+      const existingKey = new URL(entry.file_url).pathname.slice(1);
 
-      // All existing pages except the last (contact page)
-      const bodyIndices = Array.from({ length: count - 1 }, (_, i) => i);
-      const existingBodyPages = await merged.copyPages(existingDoc, bodyIndices);
-      existingBodyPages.forEach((p) => merged.addPage(p));
+      const mergeForm = new FormData();
+      mergeForm.append("newPages", newPdfBlob, "new-pages.pdf");
+      mergeForm.append("existingKey", existingKey);
 
-      // New photo pages
-      const newPageIndices = Array.from({ length: newDoc.getPageCount() }, (_, i) => i);
-      const newPages = await merged.copyPages(newDoc, newPageIndices);
-      newPages.forEach((p) => merged.addPage(p));
-
-      // Re-add the contact page (last of existing)
-      const [contactPage] = await merged.copyPages(existingDoc, [count - 1]);
-      merged.addPage(contactPage);
-
-      const mergedBytes = await merged.save();
-
-      // ── Re-upload to same R2 path via presigned URL (no size limit) ─
-      setStatusMsg("Uploading updated PDF…");
-      const blobPath = new URL(entry.file_url).pathname.slice(1);
-      const mergedBlob = new Blob([new Uint8Array(mergedBytes)], { type: "application/pdf" });
-
-      const presignRes = await fetch("/api/catalog/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pathname: blobPath, contentType: "application/pdf" }),
-      });
-      let presignData: { url?: string; error?: string } = {};
-      try { presignData = await presignRes.json(); } catch { /* ignore */ }
-      if (!presignRes.ok) throw new Error(presignData.error ?? `Presign failed (HTTP ${presignRes.status})`);
-
-      const putRes = await fetch(presignData.url!, {
-        method: "PUT",
-        headers: { "Content-Type": "application/pdf" },
-        body: mergedBlob,
-      });
-      if (!putRes.ok) throw new Error(`Upload failed (HTTP ${putRes.status})`);
+      const mergeRes = await fetch("/api/catalog/merge", { method: "POST", body: mergeForm });
+      let mergeData: { error?: string } = {};
+      try { mergeData = await mergeRes.json(); } catch { /* ignore */ }
+      if (!mergeRes.ok) throw new Error(mergeData.error ?? `Upload failed (HTTP ${mergeRes.status})`);
 
       setStep("done");
     } catch (err) {
