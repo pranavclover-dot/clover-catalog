@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PDFDocument } from "pdf-lib";
 import { r2, BUCKET, PUBLIC_URL } from "@/lib/r2";
 
 export const runtime = "nodejs";
@@ -13,8 +14,6 @@ export async function POST(req: NextRequest) {
     if (!newPagesFile || !existingKey) {
       return NextResponse.json({ error: "newPages and existingKey required" }, { status: 400 });
     }
-
-    const { PDFDocument } = await import("pdf-lib");
 
     // Load existing PDF from R2
     const existing = await r2.send(new GetObjectCommand({ Bucket: BUCKET, Key: existingKey }));
