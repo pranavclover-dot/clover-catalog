@@ -128,7 +128,7 @@ export default function HomePage() {
         });
 
         const canvas = await html2canvas(el, {
-          scale: 2,
+          scale: 1.5,
           useCORS: true,
           allowTaint: true,
           backgroundColor: "#ffffff",
@@ -138,7 +138,7 @@ export default function HomePage() {
         });
 
         if (i > 0) pdf.addPage([794, 1123], "portrait");
-        const imgData = canvas.toDataURL("image/jpeg", 0.75);
+        const imgData = canvas.toDataURL("image/jpeg", 0.55);
         pdf.addImage(imgData, "JPEG", 0, 0, 794, 1123);
 
         // Add clickable link overlays on top of the image
